@@ -1,8 +1,13 @@
-import React from "react";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "next-themes";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { headers as getHeaders } from "next/headers.js";
+import { redirect } from "next/navigation";
+import { ThemeProvider } from "next-themes";
+import { getPayload } from "payload";
+import type React from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/auth.context";
+import config from "@/payload.config";
 
 export const metadata = {
   description: "A blank template using Payload in a Next.js app.",
@@ -11,12 +16,28 @@ export const metadata = {
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props;
+  const headers = await getHeaders();
+  const payloadConfig = await config;
+  const payload = await getPayload({ config: payloadConfig });
+  const { user } = await payload.auth({ headers });
+
+  // Get current pathname to avoid redirect loops
+  const xPathname = headers.get("x-pathname");
+  const referer = headers.get("referer");
+  const pathname = xPathname ?? referer ?? "";
+  const isAuthPage = pathname.includes("/admin/auth/");
+
+  // Redirect to sign-in if user is not found and not already on auth page
+  const shouldRedirect = user === null && !isAuthPage;
+
+  if (shouldRedirect) {
+    redirect("/admin/auth/sign-in");
+  }
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} h-screen w-screen antialiased`}
-        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"
@@ -24,8 +45,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           disableTransitionOnChange
           enableSystem
         >
-          <main>{children}</main>
-          <Toaster />
+          <AuthProvider user={user}>
+            <main>{children}</main>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
