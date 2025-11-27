@@ -7,22 +7,22 @@
  */
 
 import type {} from "@payloadcms/db-postgres";
-import { relations } from "@payloadcms/db-postgres/drizzle";
 import {
-  boolean,
-  foreignKey,
+  pgTable,
   index,
+  uniqueIndex,
+  foreignKey,
+  uuid,
+  varchar,
+  boolean,
+  timestamp,
   integer,
   jsonb,
   numeric,
-  pgEnum,
-  pgTable,
   serial,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
+  pgEnum,
 } from "@payloadcms/db-postgres/drizzle/pg-core";
+import { sql, relations } from "@payloadcms/db-postgres/drizzle";
 export const enum_users_role = pgEnum("enum_users_role", ["user", "admin"]);
 
 export const users = pgTable(
@@ -61,7 +61,7 @@ export const users = pgTable(
     uniqueIndex("users_email_idx").on(columns.email),
     index("users_updated_at_idx").on(columns.updatedAt),
     index("users_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const user_sessions = pgTable(
@@ -106,7 +106,7 @@ export const user_sessions = pgTable(
     index("user_sessions_impersonated_by_idx").on(columns.impersonatedBy),
     index("user_sessions_updated_at_idx").on(columns.updatedAt),
     index("user_sessions_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const user_accounts = pgTable(
@@ -155,7 +155,7 @@ export const user_accounts = pgTable(
     index("user_accounts_provider_id_idx").on(columns.providerId),
     index("user_accounts_updated_at_idx").on(columns.updatedAt),
     index("user_accounts_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const user_verifications = pgTable(
@@ -187,7 +187,389 @@ export const user_verifications = pgTable(
   (columns) => [
     index("user_verifications_updated_at_idx").on(columns.updatedAt),
     index("user_verifications_created_at_idx").on(columns.createdAt),
-  ]
+  ],
+);
+
+export const world_gallery = pgTable(
+  "world_gallery",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    image: uuid("image_id")
+      .notNull()
+      .references(() => media.id, {
+        onDelete: "set null",
+      }),
+  },
+  (columns) => [
+    index("world_gallery_order_idx").on(columns._order),
+    index("world_gallery_parent_id_idx").on(columns._parentID),
+    index("world_gallery_image_idx").on(columns.image),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [world.id],
+      name: "world_gallery_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const world_tags = pgTable(
+  "world_tags",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    tag: varchar("tag").notNull(),
+  },
+  (columns) => [
+    index("world_tags_order_idx").on(columns._order),
+    index("world_tags_parent_id_idx").on(columns._parentID),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [world.id],
+      name: "world_tags_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const world = pgTable(
+  "world",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name").notNull(),
+    slug: varchar("slug").notNull(),
+    tagline: varchar("tagline"),
+    description: jsonb("description"),
+    coverImage: uuid("cover_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    bannerImage: uuid("banner_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    author: uuid("author_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "set null",
+      }),
+    isPublic: boolean("is_public").notNull().default(true),
+    stats_seriesCount: numeric("stats_series_count", {
+      mode: "number",
+    }).default(0),
+    stats_storyCount: numeric("stats_story_count", { mode: "number" }).default(
+      0,
+    ),
+    stats_characterCount: numeric("stats_character_count", {
+      mode: "number",
+    }).default(0),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex("world_name_idx").on(columns.name),
+    uniqueIndex("world_slug_idx").on(columns.slug),
+    index("world_cover_image_idx").on(columns.coverImage),
+    index("world_banner_image_idx").on(columns.bannerImage),
+    index("world_author_idx").on(columns.author),
+    index("world_updated_at_idx").on(columns.updatedAt),
+    index("world_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const series_gallery = pgTable(
+  "series_gallery",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    image: uuid("image_id")
+      .notNull()
+      .references(() => media.id, {
+        onDelete: "set null",
+      }),
+  },
+  (columns) => [
+    index("series_gallery_order_idx").on(columns._order),
+    index("series_gallery_parent_id_idx").on(columns._parentID),
+    index("series_gallery_image_idx").on(columns.image),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [series.id],
+      name: "series_gallery_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const series = pgTable(
+  "series",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: varchar("title").notNull(),
+    slug: varchar("slug").notNull(),
+    world: uuid("world_id")
+      .notNull()
+      .references(() => world.id, {
+        onDelete: "set null",
+      }),
+    tagline: varchar("tagline"),
+    description: jsonb("description"),
+    coverImage: uuid("cover_image_id")
+      .notNull()
+      .references(() => media.id, {
+        onDelete: "set null",
+      }),
+    bannerImage: uuid("banner_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    author: uuid("author_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "set null",
+      }),
+    isPublic: boolean("is_public").notNull().default(true),
+    stats_storyCount: numeric("stats_story_count", { mode: "number" }).default(
+      0,
+    ),
+    stats_viewCount: numeric("stats_view_count", { mode: "number" }).default(0),
+    stats_likeCount: numeric("stats_like_count", { mode: "number" }).default(0),
+    stats_followerCount: numeric("stats_follower_count", {
+      mode: "number",
+    }).default(0),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex("series_slug_idx").on(columns.slug),
+    index("series_world_idx").on(columns.world),
+    index("series_cover_image_idx").on(columns.coverImage),
+    index("series_banner_image_idx").on(columns.bannerImage),
+    index("series_author_idx").on(columns.author),
+    index("series_updated_at_idx").on(columns.updatedAt),
+    index("series_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const story_gallery = pgTable(
+  "story_gallery",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    image: uuid("image_id")
+      .notNull()
+      .references(() => media.id, {
+        onDelete: "set null",
+      }),
+  },
+  (columns) => [
+    index("story_gallery_order_idx").on(columns._order),
+    index("story_gallery_parent_id_idx").on(columns._parentID),
+    index("story_gallery_image_idx").on(columns.image),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [story.id],
+      name: "story_gallery_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const story = pgTable(
+  "story",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: varchar("title").notNull(),
+    slug: varchar("slug").notNull(),
+    world: uuid("world_id")
+      .notNull()
+      .references(() => world.id, {
+        onDelete: "set null",
+      }),
+    series: uuid("series_id").references(() => series.id, {
+      onDelete: "set null",
+    }),
+    seriesOrder: numeric("series_order", { mode: "number" }),
+    content: jsonb("content"),
+    tagline: varchar("tagline"),
+    coverImage: uuid("cover_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    authorNote: varchar("author_note"),
+    author: uuid("author_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "set null",
+      }),
+    isPublished: boolean("is_published").notNull().default(false),
+    publishedAt: timestamp("published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    scheduledAt: timestamp("scheduled_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    stats_viewCount: numeric("stats_view_count", { mode: "number" }).default(0),
+    stats_likeCount: numeric("stats_like_count", { mode: "number" }).default(0),
+    stats_commentCount: numeric("stats_comment_count", {
+      mode: "number",
+    }).default(0),
+    stats_wordCount: numeric("stats_word_count", { mode: "number" }).default(0),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex("story_slug_idx").on(columns.slug),
+    index("story_world_idx").on(columns.world),
+    index("story_series_idx").on(columns.series),
+    index("story_cover_image_idx").on(columns.coverImage),
+    index("story_author_idx").on(columns.author),
+    index("story_updated_at_idx").on(columns.updatedAt),
+    index("story_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const character_gallery = pgTable(
+  "character_gallery",
+  {
+    _order: integer("_order").notNull(),
+    _parentID: uuid("_parent_id").notNull(),
+    id: varchar("id").primaryKey(),
+    image: uuid("image_id")
+      .notNull()
+      .references(() => media.id, {
+        onDelete: "set null",
+      }),
+  },
+  (columns) => [
+    index("character_gallery_order_idx").on(columns._order),
+    index("character_gallery_parent_id_idx").on(columns._parentID),
+    index("character_gallery_image_idx").on(columns.image),
+    foreignKey({
+      columns: [columns["_parentID"]],
+      foreignColumns: [character.id],
+      name: "character_gallery_parent_id_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const character = pgTable(
+  "character",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name").notNull(),
+    slug: varchar("slug").notNull(),
+    world: uuid("world_id")
+      .notNull()
+      .references(() => world.id, {
+        onDelete: "set null",
+      }),
+    tagline: varchar("tagline"),
+    description: jsonb("description"),
+    avatar: uuid("avatar_id")
+      .notNull()
+      .references(() => media.id, {
+        onDelete: "set null",
+      }),
+    coverImage: uuid("cover_image_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    author: uuid("author_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "set null",
+      }),
+    isPublic: boolean("is_public").notNull().default(true),
+    stats_likeCount: numeric("stats_like_count", { mode: "number" }).default(0),
+    stats_viewCount: numeric("stats_view_count", { mode: "number" }).default(0),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex("character_slug_idx").on(columns.slug),
+    index("character_world_idx").on(columns.world),
+    index("character_avatar_idx").on(columns.avatar),
+    index("character_cover_image_idx").on(columns.coverImage),
+    index("character_author_idx").on(columns.author),
+    index("character_updated_at_idx").on(columns.updatedAt),
+    index("character_created_at_idx").on(columns.createdAt),
+  ],
+);
+
+export const character_rels = pgTable(
+  "character_rels",
+  {
+    id: serial("id").primaryKey(),
+    order: integer("order"),
+    parent: uuid("parent_id").notNull(),
+    path: varchar("path").notNull(),
+    storyID: uuid("story_id"),
+  },
+  (columns) => [
+    index("character_rels_order_idx").on(columns.order),
+    index("character_rels_parent_idx").on(columns.parent),
+    index("character_rels_path_idx").on(columns.path),
+    index("character_rels_story_id_idx").on(columns.storyID),
+    foreignKey({
+      columns: [columns["parent"]],
+      foreignColumns: [character.id],
+      name: "character_rels_parent_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["storyID"]],
+      foreignColumns: [story.id],
+      name: "character_rels_story_fk",
+    }).onDelete("cascade"),
+  ],
 );
 
 export const media = pgTable(
@@ -223,7 +605,7 @@ export const media = pgTable(
     index("media_updated_at_idx").on(columns.updatedAt),
     index("media_created_at_idx").on(columns.createdAt),
     uniqueIndex("media_filename_idx").on(columns.filename),
-  ]
+  ],
 );
 
 export const payload_kv = pgTable(
@@ -233,7 +615,7 @@ export const payload_kv = pgTable(
     key: varchar("key").notNull(),
     data: jsonb("data").notNull(),
   },
-  (columns) => [uniqueIndex("payload_kv_key_idx").on(columns.key)]
+  (columns) => [uniqueIndex("payload_kv_key_idx").on(columns.key)],
 );
 
 export const payload_locked_documents = pgTable(
@@ -260,7 +642,7 @@ export const payload_locked_documents = pgTable(
     index("payload_locked_documents_global_slug_idx").on(columns.globalSlug),
     index("payload_locked_documents_updated_at_idx").on(columns.updatedAt),
     index("payload_locked_documents_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const payload_locked_documents_rels = pgTable(
@@ -274,6 +656,10 @@ export const payload_locked_documents_rels = pgTable(
     "user-sessionsID": uuid("user_sessions_id"),
     "user-accountsID": uuid("user_accounts_id"),
     "user-verificationsID": uuid("user_verifications_id"),
+    worldID: uuid("world_id"),
+    seriesID: uuid("series_id"),
+    storyID: uuid("story_id"),
+    characterID: uuid("character_id"),
     mediaID: uuid("media_id"),
   },
   (columns) => [
@@ -282,13 +668,19 @@ export const payload_locked_documents_rels = pgTable(
     index("payload_locked_documents_rels_path_idx").on(columns.path),
     index("payload_locked_documents_rels_users_id_idx").on(columns.usersID),
     index("payload_locked_documents_rels_user_sessions_id_idx").on(
-      columns["user-sessionsID"]
+      columns["user-sessionsID"],
     ),
     index("payload_locked_documents_rels_user_accounts_id_idx").on(
-      columns["user-accountsID"]
+      columns["user-accountsID"],
     ),
     index("payload_locked_documents_rels_user_verifications_id_idx").on(
-      columns["user-verificationsID"]
+      columns["user-verificationsID"],
+    ),
+    index("payload_locked_documents_rels_world_id_idx").on(columns.worldID),
+    index("payload_locked_documents_rels_series_id_idx").on(columns.seriesID),
+    index("payload_locked_documents_rels_story_id_idx").on(columns.storyID),
+    index("payload_locked_documents_rels_character_id_idx").on(
+      columns.characterID,
     ),
     index("payload_locked_documents_rels_media_id_idx").on(columns.mediaID),
     foreignKey({
@@ -317,11 +709,31 @@ export const payload_locked_documents_rels = pgTable(
       name: "payload_locked_documents_rels_user_verifications_fk",
     }).onDelete("cascade"),
     foreignKey({
+      columns: [columns["worldID"]],
+      foreignColumns: [world.id],
+      name: "payload_locked_documents_rels_world_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["seriesID"]],
+      foreignColumns: [series.id],
+      name: "payload_locked_documents_rels_series_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["storyID"]],
+      foreignColumns: [story.id],
+      name: "payload_locked_documents_rels_story_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [columns["characterID"]],
+      foreignColumns: [character.id],
+      name: "payload_locked_documents_rels_character_fk",
+    }).onDelete("cascade"),
+    foreignKey({
       columns: [columns["mediaID"]],
       foreignColumns: [media.id],
       name: "payload_locked_documents_rels_media_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const payload_preferences = pgTable(
@@ -349,7 +761,7 @@ export const payload_preferences = pgTable(
     index("payload_preferences_key_idx").on(columns.key),
     index("payload_preferences_updated_at_idx").on(columns.updatedAt),
     index("payload_preferences_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const payload_preferences_rels = pgTable(
@@ -376,7 +788,7 @@ export const payload_preferences_rels = pgTable(
       foreignColumns: [users.id],
       name: "payload_preferences_rels_users_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const payload_migrations = pgTable(
@@ -403,7 +815,7 @@ export const payload_migrations = pgTable(
   (columns) => [
     index("payload_migrations_updated_at_idx").on(columns.updatedAt),
     index("payload_migrations_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const relations_users = relations(users, () => ({}));
@@ -428,8 +840,185 @@ export const relations_user_accounts = relations(user_accounts, ({ one }) => ({
 }));
 export const relations_user_verifications = relations(
   user_verifications,
-  () => ({})
+  () => ({}),
 );
+export const relations_world_gallery = relations(world_gallery, ({ one }) => ({
+  _parentID: one(world, {
+    fields: [world_gallery._parentID],
+    references: [world.id],
+    relationName: "gallery",
+  }),
+  image: one(media, {
+    fields: [world_gallery.image],
+    references: [media.id],
+    relationName: "image",
+  }),
+}));
+export const relations_world_tags = relations(world_tags, ({ one }) => ({
+  _parentID: one(world, {
+    fields: [world_tags._parentID],
+    references: [world.id],
+    relationName: "tags",
+  }),
+}));
+export const relations_world = relations(world, ({ one, many }) => ({
+  coverImage: one(media, {
+    fields: [world.coverImage],
+    references: [media.id],
+    relationName: "coverImage",
+  }),
+  bannerImage: one(media, {
+    fields: [world.bannerImage],
+    references: [media.id],
+    relationName: "bannerImage",
+  }),
+  gallery: many(world_gallery, {
+    relationName: "gallery",
+  }),
+  author: one(users, {
+    fields: [world.author],
+    references: [users.id],
+    relationName: "author",
+  }),
+  tags: many(world_tags, {
+    relationName: "tags",
+  }),
+}));
+export const relations_series_gallery = relations(
+  series_gallery,
+  ({ one }) => ({
+    _parentID: one(series, {
+      fields: [series_gallery._parentID],
+      references: [series.id],
+      relationName: "gallery",
+    }),
+    image: one(media, {
+      fields: [series_gallery.image],
+      references: [media.id],
+      relationName: "image",
+    }),
+  }),
+);
+export const relations_series = relations(series, ({ one, many }) => ({
+  world: one(world, {
+    fields: [series.world],
+    references: [world.id],
+    relationName: "world",
+  }),
+  coverImage: one(media, {
+    fields: [series.coverImage],
+    references: [media.id],
+    relationName: "coverImage",
+  }),
+  bannerImage: one(media, {
+    fields: [series.bannerImage],
+    references: [media.id],
+    relationName: "bannerImage",
+  }),
+  gallery: many(series_gallery, {
+    relationName: "gallery",
+  }),
+  author: one(users, {
+    fields: [series.author],
+    references: [users.id],
+    relationName: "author",
+  }),
+}));
+export const relations_story_gallery = relations(story_gallery, ({ one }) => ({
+  _parentID: one(story, {
+    fields: [story_gallery._parentID],
+    references: [story.id],
+    relationName: "gallery",
+  }),
+  image: one(media, {
+    fields: [story_gallery.image],
+    references: [media.id],
+    relationName: "image",
+  }),
+}));
+export const relations_story = relations(story, ({ one, many }) => ({
+  world: one(world, {
+    fields: [story.world],
+    references: [world.id],
+    relationName: "world",
+  }),
+  series: one(series, {
+    fields: [story.series],
+    references: [series.id],
+    relationName: "series",
+  }),
+  coverImage: one(media, {
+    fields: [story.coverImage],
+    references: [media.id],
+    relationName: "coverImage",
+  }),
+  gallery: many(story_gallery, {
+    relationName: "gallery",
+  }),
+  author: one(users, {
+    fields: [story.author],
+    references: [users.id],
+    relationName: "author",
+  }),
+}));
+export const relations_character_gallery = relations(
+  character_gallery,
+  ({ one }) => ({
+    _parentID: one(character, {
+      fields: [character_gallery._parentID],
+      references: [character.id],
+      relationName: "gallery",
+    }),
+    image: one(media, {
+      fields: [character_gallery.image],
+      references: [media.id],
+      relationName: "image",
+    }),
+  }),
+);
+export const relations_character_rels = relations(
+  character_rels,
+  ({ one }) => ({
+    parent: one(character, {
+      fields: [character_rels.parent],
+      references: [character.id],
+      relationName: "_rels",
+    }),
+    storyID: one(story, {
+      fields: [character_rels.storyID],
+      references: [story.id],
+      relationName: "story",
+    }),
+  }),
+);
+export const relations_character = relations(character, ({ one, many }) => ({
+  world: one(world, {
+    fields: [character.world],
+    references: [world.id],
+    relationName: "world",
+  }),
+  avatar: one(media, {
+    fields: [character.avatar],
+    references: [media.id],
+    relationName: "avatar",
+  }),
+  coverImage: one(media, {
+    fields: [character.coverImage],
+    references: [media.id],
+    relationName: "coverImage",
+  }),
+  gallery: many(character_gallery, {
+    relationName: "gallery",
+  }),
+  author: one(users, {
+    fields: [character.author],
+    references: [users.id],
+    relationName: "author",
+  }),
+  _rels: many(character_rels, {
+    relationName: "_rels",
+  }),
+}));
 export const relations_media = relations(media, () => ({}));
 export const relations_payload_kv = relations(payload_kv, () => ({}));
 export const relations_payload_locked_documents_rels = relations(
@@ -460,12 +1049,32 @@ export const relations_payload_locked_documents_rels = relations(
       references: [user_verifications.id],
       relationName: "user-verifications",
     }),
+    worldID: one(world, {
+      fields: [payload_locked_documents_rels.worldID],
+      references: [world.id],
+      relationName: "world",
+    }),
+    seriesID: one(series, {
+      fields: [payload_locked_documents_rels.seriesID],
+      references: [series.id],
+      relationName: "series",
+    }),
+    storyID: one(story, {
+      fields: [payload_locked_documents_rels.storyID],
+      references: [story.id],
+      relationName: "story",
+    }),
+    characterID: one(character, {
+      fields: [payload_locked_documents_rels.characterID],
+      references: [character.id],
+      relationName: "character",
+    }),
     mediaID: one(media, {
       fields: [payload_locked_documents_rels.mediaID],
       references: [media.id],
       relationName: "media",
     }),
-  })
+  }),
 );
 export const relations_payload_locked_documents = relations(
   payload_locked_documents,
@@ -473,7 +1082,7 @@ export const relations_payload_locked_documents = relations(
     _rels: many(payload_locked_documents_rels, {
       relationName: "_rels",
     }),
-  })
+  }),
 );
 export const relations_payload_preferences_rels = relations(
   payload_preferences_rels,
@@ -488,7 +1097,7 @@ export const relations_payload_preferences_rels = relations(
       references: [users.id],
       relationName: "users",
     }),
-  })
+  }),
 );
 export const relations_payload_preferences = relations(
   payload_preferences,
@@ -496,11 +1105,11 @@ export const relations_payload_preferences = relations(
     _rels: many(payload_preferences_rels, {
       relationName: "_rels",
     }),
-  })
+  }),
 );
 export const relations_payload_migrations = relations(
   payload_migrations,
-  () => ({})
+  () => ({}),
 );
 
 type DatabaseSchema = {
@@ -509,6 +1118,16 @@ type DatabaseSchema = {
   user_sessions: typeof user_sessions;
   user_accounts: typeof user_accounts;
   user_verifications: typeof user_verifications;
+  world_gallery: typeof world_gallery;
+  world_tags: typeof world_tags;
+  world: typeof world;
+  series_gallery: typeof series_gallery;
+  series: typeof series;
+  story_gallery: typeof story_gallery;
+  story: typeof story;
+  character_gallery: typeof character_gallery;
+  character: typeof character;
+  character_rels: typeof character_rels;
   media: typeof media;
   payload_kv: typeof payload_kv;
   payload_locked_documents: typeof payload_locked_documents;
@@ -520,6 +1139,16 @@ type DatabaseSchema = {
   relations_user_sessions: typeof relations_user_sessions;
   relations_user_accounts: typeof relations_user_accounts;
   relations_user_verifications: typeof relations_user_verifications;
+  relations_world_gallery: typeof relations_world_gallery;
+  relations_world_tags: typeof relations_world_tags;
+  relations_world: typeof relations_world;
+  relations_series_gallery: typeof relations_series_gallery;
+  relations_series: typeof relations_series;
+  relations_story_gallery: typeof relations_story_gallery;
+  relations_story: typeof relations_story;
+  relations_character_gallery: typeof relations_character_gallery;
+  relations_character_rels: typeof relations_character_rels;
+  relations_character: typeof relations_character;
   relations_media: typeof relations_media;
   relations_payload_kv: typeof relations_payload_kv;
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels;

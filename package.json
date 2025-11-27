@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "payload generate:db-schema && (drizzle-kit studio & next dev)",
     "build": "next build --webpack",
     "build:linux": "docker build --platform linux/amd64 -t better-auth-payload:latest .",
     "build:mac": "docker build -t better-auth-payload:latest .",

@@ -7,11 +7,15 @@ import { payloadCloudPlugin } from "@payloadcms/payload-cloud";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
-import { Accounts } from "@/collections/auth/Accounts";
-import { Sessions } from "@/collections/auth/Sessions";
-import { Verifications } from "@/collections/auth/Verifications";
-import { Users } from "./collections/auth/Users";
-import { Media } from "./collections/Media";
+import { Accounts } from "@/collections/auth/accounts";
+import { Sessions } from "@/collections/auth/sessions";
+import { Verifications } from "@/collections/auth/verifications";
+import { Users } from "./collections/auth/users";
+import { Character } from "./collections/character";
+import { Media } from "./collections/media";
+import { Series } from "./collections/series";
+import { Story } from "./collections/story";
+import { World } from "./collections/world";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -37,7 +41,10 @@ export default buildConfig({
     Sessions,
     Accounts,
     Verifications,
-
+    World,
+    Series,
+    Story,
+    Character,
     Media,
   ],
   editor: lexicalEditor(),

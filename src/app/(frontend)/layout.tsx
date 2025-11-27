@@ -16,6 +16,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en">
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} h-screen w-screen antialiased`}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"

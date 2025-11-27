@@ -71,18 +71,37 @@ export interface Config {
     'user-sessions': UserSession;
     'user-accounts': UserAccount;
     'user-verifications': UserVerification;
+    world: World;
+    series: Series;
+    story: Story;
+    character: Character;
     media: Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    world: {
+      series: 'series';
+      characters: 'character';
+    };
+    series: {
+      stories: 'story';
+    };
+    story: {
+      characters: 'character';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'user-sessions': UserSessionsSelect<false> | UserSessionsSelect<true>;
     'user-accounts': UserAccountsSelect<false> | UserAccountsSelect<true>;
     'user-verifications': UserVerificationsSelect<false> | UserVerificationsSelect<true>;
+    world: WorldSelect<false> | WorldSelect<true>;
+    series: SeriesSelect<false> | SeriesSelect<true>;
+    story: StorySelect<false> | StorySelect<true>;
+    character: CharacterSelect<false> | CharacterSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -202,6 +221,97 @@ export interface UserVerification {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "world".
+ */
+export interface World {
+  id: string;
+  /**
+   * Display name for the world (e.g., 'Naruto Verse', 'Cyberpunk 2077')
+   */
+  name: string;
+  /**
+   * URL-friendly identifier (auto-generated from name)
+   */
+  slug: string;
+  /**
+   * Ultra-short, punchy one-liner that appears right under the title (e.g., 'Magic is real. So is homework.')
+   */
+  tagline?: string | null;
+  /**
+   * Long-form text shown on world page (markdown supported, 0-2000 chars)
+   */
+  description?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Main visual - square cover image for the world
+   */
+  coverImage?: (string | null) | Media;
+  /**
+   * Optional wide banner image for the world page header
+   */
+  bannerImage?: (string | null) | Media;
+  /**
+   * Additional images for the world
+   */
+  gallery?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Who owns/created this world
+   */
+  author: string | User;
+  /**
+   * Public worlds are visible to everyone. Private worlds are drafts or co-writing spaces.
+   */
+  isPublic: boolean;
+  /**
+   * Tags for discovery (e.g., 'high-fantasy', 'litrpg', 'romance')
+   */
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Cached counts (updated by background jobs)
+   */
+  stats?: {
+    seriesCount?: number | null;
+    storyCount?: number | null;
+    characterCount?: number | null;
+  };
+  /**
+   * Series in this world (automatically joined from series collection)
+   */
+  series?: {
+    docs?: (string | Series)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Characters associated with this world (automatically joined from character collection)
+   */
+  characters?: {
+    docs?: (string | Character)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -218,6 +328,259 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "series".
+ */
+export interface Series {
+  id: string;
+  /**
+   * Series title (e.g., 'Demon Slayer', 'My Reincarnation as a Toaster')
+   */
+  title: string;
+  /**
+   * URL-friendly identifier (unique within world, auto-generated from title)
+   */
+  slug: string;
+  /**
+   * The world/universe this series belongs to (required - series always belongs to exactly one world)
+   */
+  world: string | World;
+  /**
+   * Ultra-short, punchy one-liner that appears right under the title on listings (e.g., 'Sharp wit, sharper blade.')
+   */
+  tagline?: string | null;
+  /**
+   * Long-form synopsis (100-1500 chars) - the blurb readers actually read. Readers decide in 8 seconds.
+   */
+  description?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Main visual - vertical cover image (like a book/novel cover) - shown everywhere, #1 retention driver
+   */
+  coverImage: string | Media;
+  /**
+   * Optional wide banner for series page header
+   */
+  bannerImage?: (string | null) | Media;
+  /**
+   * Cover variants, volume covers, etc.
+   */
+  gallery?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Who created this series
+   */
+  author: string | User;
+  /**
+   * Public series are visible to everyone. False = still drafting the series.
+   */
+  isPublic: boolean;
+  /**
+   * Cached counts (updated by background jobs)
+   */
+  stats?: {
+    /**
+     * Published chapters
+     */
+    storyCount?: number | null;
+    viewCount?: number | null;
+    likeCount?: number | null;
+    followerCount?: number | null;
+  };
+  /**
+   * Stories in this series (automatically joined from story collection)
+   */
+  stories?: {
+    docs?: (string | Story)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "story".
+ */
+export interface Story {
+  id: string;
+  /**
+   * Story title (e.g., 'Chapter 1: The Beginning' or 'The Last Wish')
+   */
+  title: string;
+  /**
+   * URL-friendly identifier (unique within series, or within world if standalone)
+   */
+  slug: string;
+  /**
+   * The world/universe this story belongs to (required - story always belongs to exactly one world)
+   */
+  world: string | World;
+  /**
+   * The series this story belongs to (omit for standalone/one-shot stories)
+   */
+  series?: (string | null) | Series;
+  /**
+   * Ordering within the series (1, 2, 3...). Only set when part of a series. Single source of truth for ordering.
+   */
+  seriesOrder?: number | null;
+  /**
+   * Markdown / full chapter text (required when published)
+   */
+  content?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Short hook shown in chapter list (e.g., 'Everything changes tonight'). Omit if not used.
+   */
+  tagline?: string | null;
+  /**
+   * Optional chapter illustration. Omit if not used.
+   */
+  coverImage?: (string | null) | Media;
+  /**
+   * Extra images that belong only to this chapter. Omit if not used.
+   */
+  gallery?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional author note at the end of the chapter. Omit if not used.
+   */
+  authorNote?: string | null;
+  /**
+   * Who created this story
+   */
+  author: string | User;
+  /**
+   * Whether this story is published (false = draft)
+   */
+  isPublished: boolean;
+  /**
+   * When the story was published. Omit if not published yet.
+   */
+  publishedAt?: string | null;
+  /**
+   * For scheduled drops. Omit if not scheduled.
+   */
+  scheduledAt?: string | null;
+  /**
+   * Cached counts (updated by background jobs)
+   */
+  stats?: {
+    viewCount?: number | null;
+    likeCount?: number | null;
+    commentCount?: number | null;
+    /**
+     * Auto-filled on save
+     */
+    wordCount?: number | null;
+  };
+  /**
+   * Characters in this story (automatically joined from character collection)
+   */
+  characters?: {
+    docs?: (string | Character)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "character".
+ */
+export interface Character {
+  id: string;
+  /**
+   * Character name (e.g., 'Luffy', 'Severus Snape')
+   */
+  name: string;
+  /**
+   * URL-friendly identifier (unique within world, auto-generated from name)
+   */
+  slug: string;
+  /**
+   * The world/universe this character belongs to (required - no cross-world characters)
+   */
+  world: string | World;
+  /**
+   * Stories this character appears in
+   */
+  story?: (string | Story)[] | null;
+  /**
+   * Ultra-short, punchy one-liner that appears right under the name (e.g., 'The sword that talks back.')
+   */
+  tagline?: string | null;
+  /**
+   * Long-form markdown biography (optional)
+   */
+  description?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Main visual - square thumbnail image (required in practice)
+   */
+  avatar: string | Media;
+  /**
+   * Optional banner or full-body art
+   */
+  coverImage?: (string | null) | Media;
+  /**
+   * Additional images for the character
+   */
+  gallery?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Who created this character
+   */
+  author: string | User;
+  /**
+   * Public characters are visible to everyone. Private characters are drafts.
+   */
+  isPublic: boolean;
+  /**
+   * Cached counts (updated by background jobs)
+   */
+  stats?: {
+    likeCount?: number | null;
+    viewCount?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -258,6 +621,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'user-verifications';
         value: string | UserVerification;
+      } | null)
+    | ({
+        relationTo: 'world';
+        value: string | World;
+      } | null)
+    | ({
+        relationTo: 'series';
+        value: string | Series;
+      } | null)
+    | ({
+        relationTo: 'story';
+        value: string | Story;
+      } | null)
+    | ({
+        relationTo: 'character';
+        value: string | Character;
       } | null)
     | ({
         relationTo: 'media';
@@ -361,6 +740,141 @@ export interface UserVerificationsSelect<T extends boolean = true> {
   identifier?: T;
   value?: T;
   expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "world_select".
+ */
+export interface WorldSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  tagline?: T;
+  description?: T;
+  coverImage?: T;
+  bannerImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  author?: T;
+  isPublic?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  stats?:
+    | T
+    | {
+        seriesCount?: T;
+        storyCount?: T;
+        characterCount?: T;
+      };
+  series?: T;
+  characters?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "series_select".
+ */
+export interface SeriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  world?: T;
+  tagline?: T;
+  description?: T;
+  coverImage?: T;
+  bannerImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  author?: T;
+  isPublic?: T;
+  stats?:
+    | T
+    | {
+        storyCount?: T;
+        viewCount?: T;
+        likeCount?: T;
+        followerCount?: T;
+      };
+  stories?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "story_select".
+ */
+export interface StorySelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  world?: T;
+  series?: T;
+  seriesOrder?: T;
+  content?: T;
+  tagline?: T;
+  coverImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  authorNote?: T;
+  author?: T;
+  isPublished?: T;
+  publishedAt?: T;
+  scheduledAt?: T;
+  stats?:
+    | T
+    | {
+        viewCount?: T;
+        likeCount?: T;
+        commentCount?: T;
+        wordCount?: T;
+      };
+  characters?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "character_select".
+ */
+export interface CharacterSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  world?: T;
+  story?: T;
+  tagline?: T;
+  description?: T;
+  avatar?: T;
+  coverImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  author?: T;
+  isPublic?: T;
+  stats?:
+    | T
+    | {
+        likeCount?: T;
+        viewCount?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
