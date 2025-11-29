@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode } from "react";
+import { createContext, type ReactNode, use } from "react";
 import type { User } from "@/payload-types";
 
 type AuthContextValue = {
@@ -20,4 +20,12 @@ export function AuthProvider({ children, user }: AuthProviderProps) {
   return (
     <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
   );
+}
+
+export function useAuthContext() {
+  const context = use(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
