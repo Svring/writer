@@ -33,3 +33,9 @@ export default function QueryProvider({
     </QueryClientProvider>
   );
 }
+
+export function useTRPCClients() {
+  return {
+    world: worldClient,
+  };
+}

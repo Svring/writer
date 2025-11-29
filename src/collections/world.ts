@@ -1,4 +1,14 @@
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import type { CollectionConfig } from "payload";
+import { world } from "@/payload-generated-schema";
+
+export const WorldSelectSchema = createSelectSchema(world);
+export const WorldInsertSchema = createInsertSchema(world);
+export const WorldUpdateSchema = createUpdateSchema(world);
 
 export const World: CollectionConfig = {
   slug: "world",
