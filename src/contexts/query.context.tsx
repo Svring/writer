@@ -6,7 +6,10 @@ import { useState } from "react";
 import { createQueryClient, createRouteClient } from "@/lib/query";
 import type { WorldRouter } from "@/routers/world.router";
 
-export const worldClient = createTRPCContext<WorldRouter>();
+export const worldClient = createTRPCContext<
+  WorldRouter,
+  { keyPrefix: true }
+>();
 
 export default function QueryProvider({
   children,
@@ -21,6 +24,7 @@ export default function QueryProvider({
   return (
     <QueryClientProvider client={queryClient}>
       <worldClient.TRPCProvider
+        keyPrefix="world"
         queryClient={queryClient}
         trpcClient={worldTrpcClient}
       >

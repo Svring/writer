@@ -1,9 +1,9 @@
-import * as schema from "@/payload-generated-schema";
 import { drizzle } from "@payloadcms/db-postgres/drizzle/node-postgres";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin as adminPlugin } from "better-auth/plugins";
-import { user, admin, ac } from "./permissions";
+import * as schema from "@/payload-generated-schema";
+import { ac, admin, user } from "./permissions";
 
 /* Payload re-exports drizzle package */
 const db = drizzle(process.env.DATABASE_URI as string);

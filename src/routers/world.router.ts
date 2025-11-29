@@ -1,7 +1,6 @@
 import { initTRPC } from "@trpc/server";
-import { getPayload } from "payload";
+import { getUserFromHeaders } from "@/lib/header";
 import { createErrorFormatter } from "@/lib/trpc-error";
-import config from "@/payload.config";
 import type { User } from "@/payload-types";
 
 // ===== CONTEXT =====
@@ -13,9 +12,7 @@ type WorldContext = {
 export async function createWorldContext(opts: {
   req: Request;
 }): Promise<WorldContext> {
-  const payloadConfig = await config;
-  const payload = await getPayload({ config: payloadConfig });
-  const { user } = await payload.auth({ headers: opts.req.headers });
+  const user = await getUserFromHeaders(opts.req.headers);
 
   return {
     user,
@@ -27,14 +24,29 @@ export async function createWorldContext(opts: {
 const t = initTRPC.context<WorldContext>().create(createErrorFormatter());
 
 export const worldRouter = t.router({
-  // Routes will be implemented here
-  // Example structure:
-  // search: t.procedure.query(async ({ ctx }) => {
-  //   // Implementation
-  // }),
-  // create: t.procedure.mutation(async ({ input, ctx }) => {
-  //   // Implementation
-  // }),
+  // ===== QUERY PROCEDURES =====
+
+  search: t.procedure.query(({ ctx: _ctx }) => {
+    // Implementation
+    throw new Error("Not implemented");
+  }),
+
+  // ===== MUTATION PROCEDURES =====
+
+  create: t.procedure.mutation(({ input: _input, ctx: _ctx }) => {
+    // Implementation
+    throw new Error("Not implemented");
+  }),
+
+  update: t.procedure.mutation(({ input: _input, ctx: _ctx }) => {
+    // Implementation
+    throw new Error("Not implemented");
+  }),
+
+  delete: t.procedure.mutation(({ input: _input, ctx: _ctx }) => {
+    // Implementation
+    throw new Error("Not implemented");
+  }),
 });
 
 export type WorldRouter = typeof worldRouter;

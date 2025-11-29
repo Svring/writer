@@ -14,12 +14,13 @@ export function createErrorFormatter() {
       const status =
         typeof data.httpStatus === "number" ? data.httpStatus : 500;
       const path = typeof data.path === "string" ? data.path : undefined;
-      const message =
-        typeof base.message === "string"
-          ? base.message
-          : base.message != null
-            ? String(base.message)
-            : "Unknown error";
+
+      let message = "Unknown error";
+      if (typeof base.message === "string") {
+        message = base.message;
+      } else if (base.message != null) {
+        message = String(base.message);
+      }
 
       return {
         ...base,

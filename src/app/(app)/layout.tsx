@@ -3,11 +3,10 @@ import { GeistSans } from "geist/font/sans";
 import { headers as getHeaders } from "next/headers.js";
 import { redirect } from "next/navigation";
 import { ThemeProvider } from "next-themes";
-import { getPayload } from "payload";
 import type React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth.context";
-import config from "@/payload.config";
+import { getUserFromHeaders } from "@/lib/header";
 
 export const metadata = {
   description: "A blank template using Payload in a Next.js app.",
@@ -17,9 +16,7 @@ export const metadata = {
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props;
   const headers = await getHeaders();
-  const payloadConfig = await config;
-  const payload = await getPayload({ config: payloadConfig });
-  const { user } = await payload.auth({ headers });
+  const user = await getUserFromHeaders(headers);
 
   // Get current pathname to avoid redirect loops
   const xPathname = headers.get("x-pathname");
