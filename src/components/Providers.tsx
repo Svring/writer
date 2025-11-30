@@ -1,52 +1,49 @@
-'use client'
+"use client";
 
-import { authClient } from '@/auth/auth-client'
-import { Toaster } from '@/components/ui/sonner'
-import { AuthUIProvider } from '@daveyplate/better-auth-ui'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import type { ReactNode } from 'react'
-import { toast } from 'sonner'
+import { AuthUIProvider } from "@daveyplate/better-auth-ui";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
+import { toast } from "sonner";
+import { authClient } from "@/auth/auth-client";
+import { Toaster } from "@/components/ui/sonner";
 
 export function Providers({ children }: { children: ReactNode }) {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <AuthUIProvider
-      basePath="/admin/auth"
-      redirectTo="/admin"
       authClient={authClient}
+      basePath="/admin/auth"
+      Link={Link}
       navigate={router.push}
-      replace={router.replace}
       onSessionChange={() => {
         // Clear router cache (protected routes)
-        router.refresh()
+        router.refresh();
       }}
-      Link={Link}
+      redirectTo="/admin"
+      replace={router.replace}
       toast={({ message, variant }) => {
         switch (variant) {
-          case 'error':
-            toast.error(message)
-            break
-          case 'info':
-            toast.info(message)
-            break
-          case 'success':
-            toast.success(message)
-            break
-          case 'warning':
-            toast.warning(message)
-            break
-          case 'default':
+          case "error":
+            toast.error(message);
+            break;
+          case "info":
+            toast.info(message);
+            break;
+          case "success":
+            toast.success(message);
+            break;
+          case "warning":
+            toast.warning(message);
+            break;
           default:
-            toast(message)
-
-            break
+            toast(message);
         }
       }}
     >
       {children}
       <Toaster />
     </AuthUIProvider>
-  )
+  );
 }

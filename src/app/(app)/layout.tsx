@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth.context";
 import { getUserFromHeaders } from "@/lib/header";
 
+import "@/styles/globals.css";
+
 export const metadata = {
   description: "A blank template using Payload in a Next.js app.",
   title: "Payload Blank Template",
@@ -43,7 +45,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           enableSystem
         >
           <AuthProvider user={user}>
-            <main>{children}</main>
+            <main className="h-full w-full">{children}</main>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
