@@ -1,8 +1,10 @@
 import { Plate, usePlateEditor } from "platejs/react";
 import { use } from "react";
 import * as Container from "@/components/container.comp";
+import { DndKit } from "@/components/editor/plugins/dnd-kit";
+import { FloatingToolbarKit } from "@/components/editor/plugins/floating-toolbar-kit";
+import { ToolbarButtons } from "@/components/editor/toolbar-buttons";
 import { FixedToolbar } from "@/components/ui/fixed-toolbar";
-import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
 import { EditorContainer, Editor as EditorContent } from "./editor";
 
 export const Start = () => {
@@ -23,15 +25,14 @@ export const Start = () => {
 };
 
 export const Editor = () => {
-  const editor = usePlateEditor();
+  const editor = usePlateEditor({
+    plugins: [...FloatingToolbarKit, ...DndKit],
+  });
 
   return (
     <Plate editor={editor}>
       <FixedToolbar>
-        <MarkToolbarButton nodeType="bold" tooltip="Bold">
-          B
-        </MarkToolbarButton>
-        {/* ... other toolbar buttons ... */}
+        <ToolbarButtons />
       </FixedToolbar>
       <EditorContainer>
         <EditorContent />
