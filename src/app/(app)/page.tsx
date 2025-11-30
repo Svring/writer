@@ -10,7 +10,7 @@ export default function HomePage() {
     useDisclosure();
 
   return (
-    <Story.Provider actions={{ onEditorOpenChange }} state={{ editorOpen }}>
+    <Container.Provider actions={{ onEditorOpenChange }} state={{ editorOpen }}>
       <Container.Vessel className="bg-background-0 p-6">
         <Container.Content className="gap-6">
           <World.Time />
@@ -18,7 +18,9 @@ export default function HomePage() {
         </Container.Content>
       </Container.Vessel>
 
-      <Story.Editor />
-    </Story.Provider>
+      <Container.Sheet>
+        <Story.Editor />
+      </Container.Sheet>
+    </Container.Provider>
   );
 }

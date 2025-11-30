@@ -1,59 +1,14 @@
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { createContext, use } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-
-// Side Context
-type ContextValue = {
-  state: {
-    editorOpen: boolean;
-  };
-  actions: {
-    onEditorOpenChange: undefined | (() => void);
-  };
-};
-
-export const Context = createContext<ContextValue>({
-  state: {
-    editorOpen: false,
-  },
-  actions: {
-    onEditorOpenChange: undefined,
-  },
-});
-
-export const Provider = ({
-  children,
-  state,
-  actions,
-}: {
-  children: React.ReactNode;
-  state: {
-    editorOpen: boolean;
-  };
-  actions: {
-    onEditorOpenChange: undefined | (() => void);
-  };
-}) => (
-  <Context.Provider
-    value={{
-      state: { editorOpen: state.editorOpen },
-      actions: { onEditorOpenChange: actions.onEditorOpenChange },
-    }}
-  >
-    {children}
-  </Context.Provider>
-);
+import { Plate, usePlateEditor } from "platejs/react";
+import { use } from "react";
+import * as Container from "@/components/container.comp";
+import { FixedToolbar } from "@/components/ui/fixed-toolbar";
+import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
+import { EditorContainer, Editor as EditorContent } from "./editor";
 
 export const Start = () => {
   const {
     actions: { onEditorOpenChange },
-  } = use(Context);
+  } = use(Container.Context);
 
   return (
     <div className="flex w-lg gap-2 rounded-lg border p-1 *:flex-1 *:cursor-pointer *:rounded-lg *:p-4 *:text-center">
@@ -68,25 +23,19 @@ export const Start = () => {
 };
 
 export const Editor = () => {
-  const {
-    state: { editorOpen },
-    actions: { onEditorOpenChange },
-  } = use(Context);
+  const editor = usePlateEditor();
 
   return (
-    <Sheet onOpenChange={onEditorOpenChange} open={editorOpen}>
-      <SheetContent
-        className="h-full border-none duration-250! ease-out"
-        closeButton={false}
-        side="bottom"
-      >
-        <SheetHeader>
-          <VisuallyHidden>
-            <SheetTitle>Editor</SheetTitle>
-            <SheetDescription>Editor</SheetDescription>
-          </VisuallyHidden>
-        </SheetHeader>
-      </SheetContent>
-    </Sheet>
+    <Plate editor={editor}>
+      <FixedToolbar>
+        <MarkToolbarButton nodeType="bold" tooltip="Bold">
+          B
+        </MarkToolbarButton>
+        {/* ... other toolbar buttons ... */}
+      </FixedToolbar>
+      <EditorContainer>
+        <EditorContent />
+      </EditorContainer>
+    </Plate>
   );
 };
