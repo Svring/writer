@@ -1,13 +1,19 @@
 "use client";
 
 import { useDisclosure } from "@reactuses/core";
+import useSWR from "swr";
 import * as Container from "@/components/container.comp";
 import * as Story from "@/components/story.comp";
 import * as World from "@/components/world.comp";
+import { fetcher } from "@/lib/fetch";
 
 export default function HomePage() {
   const { isOpen: editorOpen, onOpenChange: onEditorOpenChange } =
     useDisclosure();
+
+  const { data } = useSWR({ path: "/api/users" }, fetcher);
+
+  console.log(data);
 
   return (
     <Container.Provider actions={{ onEditorOpenChange }} state={{ editorOpen }}>

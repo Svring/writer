@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import type React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth.context";
+import SWRProvider from "@/contexts/swr.context";
 import { getUserFromHeaders } from "@/lib/header";
 
 import "@/styles/globals.css";
@@ -45,7 +46,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           enableSystem
         >
           <AuthProvider user={user}>
-            <main className="h-full w-full">{children}</main>
+            <SWRProvider>
+              <main className="h-full w-full">{children}</main>
+            </SWRProvider>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
