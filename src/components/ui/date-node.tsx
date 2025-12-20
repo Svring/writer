@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import type { TDateElement } from 'platejs';
-import type { PlateElementProps } from 'platejs/react';
+import type { TDateElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
 
-import { PlateElement, useReadOnly } from 'platejs/react';
+import { PlateElement, useReadOnly } from "platejs/react";
 
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 export function DateElement(props: PlateElementProps<TDateElement>) {
   const { editor, element } = props;
@@ -21,7 +21,7 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
   const trigger = (
     <span
       className={cn(
-        'w-fit cursor-pointer rounded-sm bg-muted px-1 text-muted-foreground'
+        "w-fit cursor-pointer rounded-sm bg-muted px-1 text-muted-foreground"
       )}
       contentEditable={false}
       draggable
@@ -42,14 +42,14 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
             new Date(today.setDate(today.getDate() + 2)).toDateString() ===
             elementDate.toDateString();
 
-          if (isToday) return 'Today';
-          if (isYesterday) return 'Yesterday';
-          if (isTomorrow) return 'Tomorrow';
+          if (isToday) return "Today";
+          if (isYesterday) return "Yesterday";
+          if (isTomorrow) return "Tomorrow";
 
           return elementDate.toLocaleDateString(undefined, {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
+            day: "numeric",
+            month: "long",
+            year: "numeric",
           });
         })()
       ) : (
@@ -65,17 +65,18 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
   return (
     <PlateElement
       {...props}
-      className="inline-block"
       attributes={{
         ...props.attributes,
         contentEditable: false,
       }}
+      className="inline-block"
     >
       <Popover>
         <PopoverTrigger asChild>{trigger}</PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
-            selected={new Date(element.date as string)}
+            initialFocus
+            mode="single"
             onSelect={(date) => {
               if (!date) return;
 
@@ -84,8 +85,7 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
                 { at: element }
               );
             }}
-            mode="single"
-            initialFocus
+            selected={new Date(element.date as string)}
           />
         </PopoverContent>
       </Popover>

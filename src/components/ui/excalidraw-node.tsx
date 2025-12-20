@@ -1,14 +1,11 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import type { TExcalidrawElement } from "@platejs/excalidraw";
+import { useExcalidrawElement } from "@platejs/excalidraw/react";
+import type { PlateElementProps } from "platejs/react";
+import { PlateElement, useReadOnly } from "platejs/react";
 
-import type { TExcalidrawElement } from '@platejs/excalidraw';
-import type { PlateElementProps } from 'platejs/react';
-
-import { useExcalidrawElement } from '@platejs/excalidraw/react';
-import { PlateElement, useReadOnly } from 'platejs/react';
-
-import '@excalidraw/excalidraw/index.css';
+import "@excalidraw/excalidraw/index.css";
 
 export function ExcalidrawElement(
   props: PlateElementProps<TExcalidrawElement>

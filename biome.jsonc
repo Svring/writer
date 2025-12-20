@@ -7,8 +7,8 @@
       "recommended": true,
       "performance": {
         "noImgElement": "off",
-        "noNamespaceImport": "off",
-      },
-    },
-  },
+        "noNamespaceImport": "off"
+      }
+    }
+  }
 }

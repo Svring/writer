@@ -1,5 +1,5 @@
-import { auth } from "@/auth/auth";
 import type { CollectionConfig } from "payload";
+import { auth } from "@/auth/auth";
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -15,7 +15,7 @@ export const Users: CollectionConfig = {
           try {
             const userSession = await auth.api.getSession({ headers });
 
-            if (!userSession || !userSession.user) return { user: null };
+            if (!(userSession && userSession.user)) return { user: null };
 
             const userData = await payload.findByID({
               collection: "users",

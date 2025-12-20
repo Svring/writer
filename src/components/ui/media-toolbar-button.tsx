@@ -1,21 +1,20 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import { PlaceholderPlugin } from "@platejs/media/react";
 
-import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-
-import { PlaceholderPlugin } from '@platejs/media/react';
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import {
   AudioLinesIcon,
   FileUpIcon,
   FilmIcon,
   ImageIcon,
   LinkIcon,
-} from 'lucide-react';
-import { isUrl, KEYS } from 'platejs';
-import { useEditorRef } from 'platejs/react';
-import { toast } from 'sonner';
-import { useFilePicker } from 'use-file-picker';
+} from "lucide-react";
+import { isUrl, KEYS } from "platejs";
+import { useEditorRef } from "platejs/react";
+import * as React from "react";
+import { toast } from "sonner";
+import { useFilePicker } from "use-file-picker";
 
 import {
   AlertDialog,
@@ -26,21 +25,21 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 
 import {
   ToolbarSplitButton,
   ToolbarSplitButtonPrimary,
   ToolbarSplitButtonSecondary,
-} from './toolbar';
+} from "./toolbar";
 
 const MEDIA_CONFIG: Record<
   string,
@@ -52,28 +51,28 @@ const MEDIA_CONFIG: Record<
   }
 > = {
   [KEYS.audio]: {
-    accept: ['audio/*'],
+    accept: ["audio/*"],
     icon: <AudioLinesIcon className="size-4" />,
-    title: 'Insert Audio',
-    tooltip: 'Audio',
+    title: "Insert Audio",
+    tooltip: "Audio",
   },
   [KEYS.file]: {
-    accept: ['*'],
+    accept: ["*"],
     icon: <FileUpIcon className="size-4" />,
-    title: 'Insert File',
-    tooltip: 'File',
+    title: "Insert File",
+    tooltip: "File",
   },
   [KEYS.img]: {
-    accept: ['image/*'],
+    accept: ["image/*"],
     icon: <ImageIcon className="size-4" />,
-    title: 'Insert Image',
-    tooltip: 'Image',
+    title: "Insert Image",
+    tooltip: "Image",
   },
   [KEYS.video]: {
-    accept: ['video/*'],
+    accept: ["video/*"],
     icon: <FilmIcon className="size-4" />,
-    title: 'Insert Video',
-    tooltip: 'Video',
+    title: "Insert Video",
+    tooltip: "Video",
   },
 };
 
@@ -102,7 +101,7 @@ export function MediaToolbarButton({
           openFilePicker();
         }}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') {
+          if (e.key === "ArrowDown") {
             e.preventDefault();
             setOpen(true);
           }
@@ -114,9 +113,9 @@ export function MediaToolbarButton({
         </ToolbarSplitButtonPrimary>
 
         <DropdownMenu
-          open={open}
-          onOpenChange={setOpen}
           modal={false}
+          onOpenChange={setOpen}
+          open={open}
           {...props}
         >
           <DropdownMenuTrigger asChild>
@@ -124,9 +123,9 @@ export function MediaToolbarButton({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
-            onClick={(e) => e.stopPropagation()}
             align="start"
             alignOffset={-32}
+            onClick={(e) => e.stopPropagation()}
           >
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={() => openFilePicker()}>
@@ -143,10 +142,10 @@ export function MediaToolbarButton({
       </ToolbarSplitButton>
 
       <AlertDialog
-        open={dialogOpen}
         onOpenChange={(value) => {
           setDialogOpen(value);
         }}
+        open={dialogOpen}
       >
         <AlertDialogContent className="gap-6">
           <MediaUrlDialogContent
@@ -170,15 +169,15 @@ function MediaUrlDialogContent({
   setOpen: (value: boolean) => void;
 }) {
   const editor = useEditorRef();
-  const [url, setUrl] = React.useState('');
+  const [url, setUrl] = React.useState("");
 
   const embedMedia = React.useCallback(() => {
-    if (!isUrl(url)) return toast.error('Invalid URL');
+    if (!isUrl(url)) return toast.error("Invalid URL");
 
     setOpen(false);
     editor.tf.insertNodes({
-      children: [{ text: '' }],
-      name: nodeType === KEYS.file ? url.split('/').pop() : undefined,
+      children: [{ text: "" }],
+      name: nodeType === KEYS.file ? url.split("/").pop() : undefined,
       type: nodeType,
       url,
     });
@@ -192,22 +191,22 @@ function MediaUrlDialogContent({
 
       <AlertDialogDescription className="group relative w-full">
         <label
-          className="-translate-y-1/2 absolute top-1/2 block cursor-text px-1 text-muted-foreground/70 text-sm transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:font-medium group-focus-within:text-foreground group-focus-within:text-xs has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground has-[+input:not(:placeholder-shown)]:text-xs"
+          className="absolute top-1/2 block -translate-y-1/2 cursor-text px-1 text-muted-foreground/70 text-sm transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:font-medium group-focus-within:text-foreground group-focus-within:text-xs has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground has-[+input:not(:placeholder-shown)]:text-xs"
           htmlFor="url"
         >
           <span className="inline-flex bg-background px-2">URL</span>
         </label>
         <Input
-          id="url"
+          autoFocus
           className="w-full"
-          value={url}
+          id="url"
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') embedMedia();
+            if (e.key === "Enter") embedMedia();
           }}
           placeholder=""
           type="url"
-          autoFocus
+          value={url}
         />
       </AlertDialogDescription>
 

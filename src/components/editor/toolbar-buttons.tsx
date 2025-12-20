@@ -2,20 +2,15 @@
 
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEditorReadOnly } from "platejs/react";
-import { use } from "react";
-import * as Container from "@/components/container.comp";
 import {
   RedoToolbarButton,
   UndoToolbarButton,
 } from "@/components/ui/history-toolbar-button";
+import { SheetClose } from "@/components/ui/sheet";
 import { ToolbarButton, ToolbarGroup } from "@/components/ui/toolbar";
 
 export function ToolbarButtons() {
   const readOnly = useEditorReadOnly();
-
-  const {
-    actions: { onEditorOpenChange },
-  } = use(Container.Context);
 
   return (
     <div className="flex w-full">
@@ -23,9 +18,11 @@ export function ToolbarButtons() {
         <div className="flex w-full justify-between">
           <div className="flex">
             <ToolbarGroup>
-              <ToolbarButton onClick={() => onEditorOpenChange?.()}>
-                <ChevronDown />
-              </ToolbarButton>
+              <SheetClose asChild data-slot="editor-sheet-close">
+                <ToolbarButton>
+                  <ChevronDown />
+                </ToolbarButton>
+              </SheetClose>
             </ToolbarGroup>
 
             <ToolbarGroup>

@@ -1,34 +1,33 @@
-'use client';
-/* eslint-disable react-hooks/refs -- Ref usage for color picker component refs */
+"use client";
 
-import React from 'react';
+/* eslint-disable react-hooks/refs -- Ref usage for color picker component refs */
 
 import type {
   DropdownMenuItemProps,
   DropdownMenuProps,
-} from '@radix-ui/react-dropdown-menu';
+} from "@radix-ui/react-dropdown-menu";
+import { useComposedRef } from "@udecode/cn";
+import debounce from "lodash/debounce.js";
+import { EraserIcon, PlusIcon } from "lucide-react";
+import { useEditorRef, useEditorSelector } from "platejs/react";
+import React from "react";
 
-import { useComposedRef } from '@udecode/cn';
-import debounce from 'lodash/debounce.js';
-import { EraserIcon, PlusIcon } from 'lucide-react';
-import { useEditorRef, useEditorSelector } from 'platejs/react';
-
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
+import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
 
 export function FontColorToolbarButton({
   children,
@@ -103,11 +102,11 @@ export function FontColorToolbarButton({
 
   return (
     <DropdownMenu
-      open={open}
+      modal={false}
       onOpenChange={(value) => {
         setOpen(value);
       }}
-      modal={false}
+      open={open}
     >
       <DropdownMenuTrigger asChild>
         <ToolbarButton pressed={open} tooltip={tooltip}>
@@ -117,8 +116,8 @@ export function FontColorToolbarButton({
 
       <DropdownMenuContent align="start">
         <ColorPicker
-          color={selectedColor || color}
           clearColor={clearColor}
+          color={selectedColor || color}
           colors={DEFAULT_COLORS}
           customColors={DEFAULT_CUSTOM_COLORS}
           updateColor={updateColorAndClose}
@@ -138,7 +137,7 @@ function PureColorPicker({
   updateColor,
   updateCustomColor,
   ...props
-}: React.ComponentProps<'div'> & {
+}: React.ComponentProps<"div"> & {
   colors: TColor[];
   customColors: TColor[];
   clearColor: () => void;
@@ -147,11 +146,11 @@ function PureColorPicker({
   color?: string;
 }) {
   return (
-    <div className={cn('flex flex-col', className)} {...props}>
+    <div className={cn("flex flex-col", className)} {...props}>
       <ToolbarMenuGroup label="Custom Colors">
         <ColorCustom
-          color={color}
           className="px-2"
+          color={color}
           colors={colors}
           customColors={customColors}
           updateColor={updateColor}
@@ -160,8 +159,8 @@ function PureColorPicker({
       </ToolbarMenuGroup>
       <ToolbarMenuGroup label="Default Colors">
         <ColorDropdownMenuItems
-          color={color}
           className="px-2"
+          color={color}
           colors={colors}
           updateColor={updateColor}
         />
@@ -200,9 +199,9 @@ function ColorCustom({
   updateColor: (color: string) => void;
   updateCustomColor: (color: string) => void;
   color?: string;
-} & React.ComponentPropsWithoutRef<'div'>) {
+} & React.ComponentPropsWithoutRef<"div">) {
   const [customColor, setCustomColor] = React.useState<string>();
-  const [value, setValue] = React.useState<string>(color || '#000000');
+  const [value, setValue] = React.useState<string>(color || "#000000");
 
   React.useEffect(() => {
     if (
@@ -223,7 +222,7 @@ function ColorCustom({
             ...customColors,
             {
               isBrightColor: false,
-              name: '',
+              name: "",
               value: customColor,
             },
           ]
@@ -238,26 +237,26 @@ function ColorCustom({
   );
 
   return (
-    <div className={cn('relative flex flex-col gap-4', className)} {...props}>
+    <div className={cn("relative flex flex-col gap-4", className)} {...props}>
       <ColorDropdownMenuItems
         color={color}
         colors={computedColors}
         updateColor={updateColor}
       >
         <ColorInput
-          value={value}
           onChange={(e) => {
             setValue(e.target.value);
             updateCustomColorDebounced(e.target.value);
           }}
+          value={value}
         >
           <DropdownMenuItem
             className={cn(
               buttonVariants({
-                size: 'icon',
-                variant: 'outline',
+                size: "icon",
+                variant: "outline",
               }),
-              'absolute top-1 right-2 bottom-2 flex size-8 items-center justify-center rounded-full'
+              "absolute top-1 right-2 bottom-2 flex size-8 items-center justify-center rounded-full"
             )}
             onSelect={(e) => {
               e.preventDefault();
@@ -275,9 +274,9 @@ function ColorCustom({
 function ColorInput({
   children,
   className,
-  value = '#000000',
+  value = "#000000",
   ...props
-}: React.ComponentProps<'input'>) {
+}: React.ComponentProps<"input">) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   return (
@@ -296,10 +295,10 @@ function ColorInput({
       })}
       <input
         {...props}
+        className={cn("size-0 overflow-hidden border-0 p-0", className)}
         ref={useComposedRef(props.ref, inputRef)}
-        className={cn('size-0 overflow-hidden border-0 p-0', className)}
-        value={value}
         type="color"
+        value={value}
       />
     </div>
   );
@@ -330,19 +329,19 @@ function ColorDropdownMenuItem({
     <DropdownMenuItem
       className={cn(
         buttonVariants({
-          size: 'icon',
-          variant: 'outline',
+          size: "icon",
+          variant: "outline",
         }),
-        'my-1 flex size-6 items-center justify-center rounded-full border border-muted border-solid p-0 transition-all hover:scale-125',
-        !isBrightColor && 'border-transparent',
-        isSelected && 'border-2 border-primary',
+        "my-1 flex size-6 items-center justify-center rounded-full border border-muted border-solid p-0 transition-all hover:scale-125",
+        !isBrightColor && "border-transparent",
+        isSelected && "border-2 border-primary",
         className
       )}
-      style={{ backgroundColor: value }}
       onSelect={(e) => {
         e.preventDefault();
         updateColor(value);
       }}
+      style={{ backgroundColor: value }}
       {...props}
     />
   );
@@ -367,11 +366,11 @@ export function ColorDropdownMenuItems({
   colors: TColor[];
   updateColor: (color: string) => void;
   color?: string;
-} & React.ComponentProps<'div'>) {
+} & React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        'grid grid-cols-[repeat(10,1fr)] place-items-center gap-x-1',
+        "grid grid-cols-[repeat(10,1fr)] place-items-center gap-x-1",
         className
       )}
       {...props}
@@ -379,12 +378,12 @@ export function ColorDropdownMenuItems({
       <TooltipProvider>
         {colors.map(({ isBrightColor, name, value }) => (
           <ColorDropdownMenuItem
-            name={name}
-            key={name ?? value}
-            value={value}
             isBrightColor={isBrightColor}
             isSelected={color === value}
+            key={name ?? value}
+            name={name}
             updateColor={updateColor}
+            value={value}
           />
         ))}
         {props.children}
@@ -396,436 +395,436 @@ export function ColorDropdownMenuItems({
 export const DEFAULT_COLORS = [
   {
     isBrightColor: false,
-    name: 'black',
-    value: '#000000',
+    name: "black",
+    value: "#000000",
   },
   {
     isBrightColor: false,
-    name: 'dark grey 4',
-    value: '#434343',
+    name: "dark grey 4",
+    value: "#434343",
   },
   {
     isBrightColor: false,
-    name: 'dark grey 3',
-    value: '#666666',
+    name: "dark grey 3",
+    value: "#666666",
   },
   {
     isBrightColor: false,
-    name: 'dark grey 2',
-    value: '#999999',
+    name: "dark grey 2",
+    value: "#999999",
   },
   {
     isBrightColor: false,
-    name: 'dark grey 1',
-    value: '#B7B7B7',
+    name: "dark grey 1",
+    value: "#B7B7B7",
   },
   {
     isBrightColor: false,
-    name: 'grey',
-    value: '#CCCCCC',
+    name: "grey",
+    value: "#CCCCCC",
   },
   {
     isBrightColor: false,
-    name: 'light grey 1',
-    value: '#D9D9D9',
+    name: "light grey 1",
+    value: "#D9D9D9",
   },
   {
     isBrightColor: true,
-    name: 'light grey 2',
-    value: '#EFEFEF',
+    name: "light grey 2",
+    value: "#EFEFEF",
   },
   {
     isBrightColor: true,
-    name: 'light grey 3',
-    value: '#F3F3F3',
+    name: "light grey 3",
+    value: "#F3F3F3",
   },
   {
     isBrightColor: true,
-    name: 'white',
-    value: '#FFFFFF',
+    name: "white",
+    value: "#FFFFFF",
   },
   {
     isBrightColor: false,
-    name: 'red berry',
-    value: '#980100',
+    name: "red berry",
+    value: "#980100",
   },
   {
     isBrightColor: false,
-    name: 'red',
-    value: '#FE0000',
+    name: "red",
+    value: "#FE0000",
   },
   {
     isBrightColor: false,
-    name: 'orange',
-    value: '#FE9900',
+    name: "orange",
+    value: "#FE9900",
   },
   {
     isBrightColor: true,
-    name: 'yellow',
-    value: '#FEFF00',
+    name: "yellow",
+    value: "#FEFF00",
   },
   {
     isBrightColor: false,
-    name: 'green',
-    value: '#00FF00',
+    name: "green",
+    value: "#00FF00",
   },
   {
     isBrightColor: false,
-    name: 'cyan',
-    value: '#00FFFF',
+    name: "cyan",
+    value: "#00FFFF",
   },
   {
     isBrightColor: false,
-    name: 'cornflower blue',
-    value: '#4B85E8',
+    name: "cornflower blue",
+    value: "#4B85E8",
   },
   {
     isBrightColor: false,
-    name: 'blue',
-    value: '#1300FF',
+    name: "blue",
+    value: "#1300FF",
   },
   {
     isBrightColor: false,
-    name: 'purple',
-    value: '#9900FF',
+    name: "purple",
+    value: "#9900FF",
   },
   {
     isBrightColor: false,
-    name: 'magenta',
-    value: '#FF00FF',
+    name: "magenta",
+    value: "#FF00FF",
   },
 
   {
     isBrightColor: false,
-    name: 'light red berry 3',
-    value: '#E6B8AF',
+    name: "light red berry 3",
+    value: "#E6B8AF",
   },
   {
     isBrightColor: false,
-    name: 'light red 3',
-    value: '#F4CCCC',
+    name: "light red 3",
+    value: "#F4CCCC",
   },
   {
     isBrightColor: true,
-    name: 'light orange 3',
-    value: '#FCE4CD',
+    name: "light orange 3",
+    value: "#FCE4CD",
   },
   {
     isBrightColor: true,
-    name: 'light yellow 3',
-    value: '#FFF2CC',
+    name: "light yellow 3",
+    value: "#FFF2CC",
   },
   {
     isBrightColor: true,
-    name: 'light green 3',
-    value: '#D9EAD3',
+    name: "light green 3",
+    value: "#D9EAD3",
   },
   {
     isBrightColor: false,
-    name: 'light cyan 3',
-    value: '#D0DFE3',
+    name: "light cyan 3",
+    value: "#D0DFE3",
   },
   {
     isBrightColor: false,
-    name: 'light cornflower blue 3',
-    value: '#C9DAF8',
+    name: "light cornflower blue 3",
+    value: "#C9DAF8",
   },
   {
     isBrightColor: true,
-    name: 'light blue 3',
-    value: '#CFE1F3',
+    name: "light blue 3",
+    value: "#CFE1F3",
   },
   {
     isBrightColor: true,
-    name: 'light purple 3',
-    value: '#D9D2E9',
+    name: "light purple 3",
+    value: "#D9D2E9",
   },
   {
     isBrightColor: true,
-    name: 'light magenta 3',
-    value: '#EAD1DB',
+    name: "light magenta 3",
+    value: "#EAD1DB",
   },
 
   {
     isBrightColor: false,
-    name: 'light red berry 2',
-    value: '#DC7E6B',
+    name: "light red berry 2",
+    value: "#DC7E6B",
   },
   {
     isBrightColor: false,
-    name: 'light red 2',
-    value: '#EA9999',
+    name: "light red 2",
+    value: "#EA9999",
   },
   {
     isBrightColor: false,
-    name: 'light orange 2',
-    value: '#F9CB9C',
+    name: "light orange 2",
+    value: "#F9CB9C",
   },
   {
     isBrightColor: true,
-    name: 'light yellow 2',
-    value: '#FFE598',
+    name: "light yellow 2",
+    value: "#FFE598",
   },
   {
     isBrightColor: false,
-    name: 'light green 2',
-    value: '#B7D6A8',
+    name: "light green 2",
+    value: "#B7D6A8",
   },
   {
     isBrightColor: false,
-    name: 'light cyan 2',
-    value: '#A1C4C9',
+    name: "light cyan 2",
+    value: "#A1C4C9",
   },
   {
     isBrightColor: false,
-    name: 'light cornflower blue 2',
-    value: '#A4C2F4',
+    name: "light cornflower blue 2",
+    value: "#A4C2F4",
   },
   {
     isBrightColor: false,
-    name: 'light blue 2',
-    value: '#9FC5E8',
+    name: "light blue 2",
+    value: "#9FC5E8",
   },
   {
     isBrightColor: false,
-    name: 'light purple 2',
-    value: '#B5A7D5',
+    name: "light purple 2",
+    value: "#B5A7D5",
   },
   {
     isBrightColor: false,
-    name: 'light magenta 2',
-    value: '#D5A6BD',
-  },
-
-  {
-    isBrightColor: false,
-    name: 'light red berry 1',
-    value: '#CC4125',
-  },
-  {
-    isBrightColor: false,
-    name: 'light red 1',
-    value: '#E06666',
-  },
-  {
-    isBrightColor: false,
-    name: 'light orange 1',
-    value: '#F6B26B',
-  },
-  {
-    isBrightColor: false,
-    name: 'light yellow 1',
-    value: '#FFD966',
-  },
-  {
-    isBrightColor: false,
-    name: 'light green 1',
-    value: '#93C47D',
-  },
-  {
-    isBrightColor: false,
-    name: 'light cyan 1',
-    value: '#76A5AE',
-  },
-  {
-    isBrightColor: false,
-    name: 'light cornflower blue 1',
-    value: '#6C9EEB',
-  },
-  {
-    isBrightColor: false,
-    name: 'light blue 1',
-    value: '#6FA8DC',
-  },
-  {
-    isBrightColor: false,
-    name: 'light purple 1',
-    value: '#8D7CC3',
-  },
-  {
-    isBrightColor: false,
-    name: 'light magenta 1',
-    value: '#C27BA0',
+    name: "light magenta 2",
+    value: "#D5A6BD",
   },
 
   {
     isBrightColor: false,
-    name: 'dark red berry 1',
-    value: '#A61B00',
+    name: "light red berry 1",
+    value: "#CC4125",
   },
   {
     isBrightColor: false,
-    name: 'dark red 1',
-    value: '#CC0000',
+    name: "light red 1",
+    value: "#E06666",
   },
   {
     isBrightColor: false,
-    name: 'dark orange 1',
-    value: '#E59138',
+    name: "light orange 1",
+    value: "#F6B26B",
   },
   {
     isBrightColor: false,
-    name: 'dark yellow 1',
-    value: '#F1C231',
+    name: "light yellow 1",
+    value: "#FFD966",
   },
   {
     isBrightColor: false,
-    name: 'dark green 1',
-    value: '#6AA74F',
+    name: "light green 1",
+    value: "#93C47D",
   },
   {
     isBrightColor: false,
-    name: 'dark cyan 1',
-    value: '#45818E',
+    name: "light cyan 1",
+    value: "#76A5AE",
   },
   {
     isBrightColor: false,
-    name: 'dark cornflower blue 1',
-    value: '#3B78D8',
+    name: "light cornflower blue 1",
+    value: "#6C9EEB",
   },
   {
     isBrightColor: false,
-    name: 'dark blue 1',
-    value: '#3E84C6',
+    name: "light blue 1",
+    value: "#6FA8DC",
   },
   {
     isBrightColor: false,
-    name: 'dark purple 1',
-    value: '#664EA6',
+    name: "light purple 1",
+    value: "#8D7CC3",
   },
   {
     isBrightColor: false,
-    name: 'dark magenta 1',
-    value: '#A64D78',
-  },
-
-  {
-    isBrightColor: false,
-    name: 'dark red berry 2',
-    value: '#84200D',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark red 2',
-    value: '#990001',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark orange 2',
-    value: '#B45F05',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark yellow 2',
-    value: '#BF9002',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark green 2',
-    value: '#38761D',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark cyan 2',
-    value: '#124F5C',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark cornflower blue 2',
-    value: '#1155CB',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark blue 2',
-    value: '#0C5394',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark purple 2',
-    value: '#351C75',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark magenta 2',
-    value: '#741B47',
+    name: "light magenta 1",
+    value: "#C27BA0",
   },
 
   {
     isBrightColor: false,
-    name: 'dark red berry 3',
-    value: '#5B0F00',
+    name: "dark red berry 1",
+    value: "#A61B00",
   },
   {
     isBrightColor: false,
-    name: 'dark red 3',
-    value: '#660000',
+    name: "dark red 1",
+    value: "#CC0000",
   },
   {
     isBrightColor: false,
-    name: 'dark orange 3',
-    value: '#783F04',
+    name: "dark orange 1",
+    value: "#E59138",
   },
   {
     isBrightColor: false,
-    name: 'dark yellow 3',
-    value: '#7E6000',
+    name: "dark yellow 1",
+    value: "#F1C231",
   },
   {
     isBrightColor: false,
-    name: 'dark green 3',
-    value: '#274E12',
+    name: "dark green 1",
+    value: "#6AA74F",
   },
   {
     isBrightColor: false,
-    name: 'dark cyan 3',
-    value: '#0D343D',
+    name: "dark cyan 1",
+    value: "#45818E",
   },
   {
     isBrightColor: false,
-    name: 'dark cornflower blue 3',
-    value: '#1B4487',
+    name: "dark cornflower blue 1",
+    value: "#3B78D8",
   },
   {
     isBrightColor: false,
-    name: 'dark blue 3',
-    value: '#083763',
+    name: "dark blue 1",
+    value: "#3E84C6",
   },
   {
     isBrightColor: false,
-    name: 'dark purple 3',
-    value: '#1F124D',
+    name: "dark purple 1",
+    value: "#664EA6",
   },
   {
     isBrightColor: false,
-    name: 'dark magenta 3',
-    value: '#4C1130',
+    name: "dark magenta 1",
+    value: "#A64D78",
+  },
+
+  {
+    isBrightColor: false,
+    name: "dark red berry 2",
+    value: "#84200D",
+  },
+  {
+    isBrightColor: false,
+    name: "dark red 2",
+    value: "#990001",
+  },
+  {
+    isBrightColor: false,
+    name: "dark orange 2",
+    value: "#B45F05",
+  },
+  {
+    isBrightColor: false,
+    name: "dark yellow 2",
+    value: "#BF9002",
+  },
+  {
+    isBrightColor: false,
+    name: "dark green 2",
+    value: "#38761D",
+  },
+  {
+    isBrightColor: false,
+    name: "dark cyan 2",
+    value: "#124F5C",
+  },
+  {
+    isBrightColor: false,
+    name: "dark cornflower blue 2",
+    value: "#1155CB",
+  },
+  {
+    isBrightColor: false,
+    name: "dark blue 2",
+    value: "#0C5394",
+  },
+  {
+    isBrightColor: false,
+    name: "dark purple 2",
+    value: "#351C75",
+  },
+  {
+    isBrightColor: false,
+    name: "dark magenta 2",
+    value: "#741B47",
+  },
+
+  {
+    isBrightColor: false,
+    name: "dark red berry 3",
+    value: "#5B0F00",
+  },
+  {
+    isBrightColor: false,
+    name: "dark red 3",
+    value: "#660000",
+  },
+  {
+    isBrightColor: false,
+    name: "dark orange 3",
+    value: "#783F04",
+  },
+  {
+    isBrightColor: false,
+    name: "dark yellow 3",
+    value: "#7E6000",
+  },
+  {
+    isBrightColor: false,
+    name: "dark green 3",
+    value: "#274E12",
+  },
+  {
+    isBrightColor: false,
+    name: "dark cyan 3",
+    value: "#0D343D",
+  },
+  {
+    isBrightColor: false,
+    name: "dark cornflower blue 3",
+    value: "#1B4487",
+  },
+  {
+    isBrightColor: false,
+    name: "dark blue 3",
+    value: "#083763",
+  },
+  {
+    isBrightColor: false,
+    name: "dark purple 3",
+    value: "#1F124D",
+  },
+  {
+    isBrightColor: false,
+    name: "dark magenta 3",
+    value: "#4C1130",
   },
 ];
 
 const DEFAULT_CUSTOM_COLORS = [
   {
     isBrightColor: false,
-    name: 'dark orange 3',
-    value: '#783F04',
+    name: "dark orange 3",
+    value: "#783F04",
   },
   {
     isBrightColor: false,
-    name: 'dark grey 3',
-    value: '#666666',
+    name: "dark grey 3",
+    value: "#666666",
   },
   {
     isBrightColor: false,
-    name: 'dark grey 2',
-    value: '#999999',
+    name: "dark grey 2",
+    value: "#999999",
   },
   {
     isBrightColor: false,
-    name: 'light cornflower blue 1',
-    value: '#6C9EEB',
+    name: "light cornflower blue 1",
+    value: "#6C9EEB",
   },
   {
     isBrightColor: false,
-    name: 'dark magenta 3',
-    value: '#4C1130',
+    name: "dark magenta 3",
+    value: "#4C1130",
   },
 ];

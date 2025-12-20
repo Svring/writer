@@ -47,7 +47,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         >
           <AuthProvider user={user}>
             <SWRProvider>
-              <main className="h-full w-full">{children}</main>
+              <main className="flex size-full">{children}</main>
             </SWRProvider>
             <Toaster />
           </AuthProvider>

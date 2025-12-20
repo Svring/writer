@@ -1,17 +1,15 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-
-import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import {
   KeyboardIcon,
   MoreHorizontalIcon,
   SubscriptIcon,
   SuperscriptIcon,
-} from 'lucide-react';
-import { KEYS } from 'platejs';
-import { useEditorRef } from 'platejs/react';
+} from "lucide-react";
+import { KEYS } from "platejs";
+import { useEditorRef } from "platejs/react";
+import * as React from "react";
 
 import {
   DropdownMenu,
@@ -19,16 +17,16 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
-import { ToolbarButton } from './toolbar';
+import { ToolbarButton } from "./toolbar";
 
 export function MoreToolbarButton(props: DropdownMenuProps) {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
+    <DropdownMenu modal={false} onOpenChange={setOpen} open={open} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton pressed={open} tooltip="Insert">
           <MoreHorizontalIcon />
@@ -36,14 +34,14 @@ export function MoreToolbarButton(props: DropdownMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="ignore-click-outside/toolbar flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto"
         align="start"
+        className="ignore-click-outside/toolbar flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto"
       >
         <DropdownMenuGroup>
           <DropdownMenuItem
             onSelect={() => {
               editor.tf.toggleMark(KEYS.kbd);
-              editor.tf.collapse({ edge: 'end' });
+              editor.tf.collapse({ edge: "end" });
               editor.tf.focus();
             }}
           >

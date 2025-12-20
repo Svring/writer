@@ -1,7 +1,7 @@
 import { eachDayOfInterval, format, isToday } from "date-fns";
 import { getCurrentSundayWeek, getGreeting } from "@/lib/time";
 
-export const Time = () => {
+export const Timeline = () => {
   const currentWeek = getCurrentSundayWeek();
   const weekDays = eachDayOfInterval({
     start: currentWeek.from,
@@ -13,7 +13,7 @@ export const Time = () => {
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-center text-lg">{getGreeting()}</h2>
-      <div className="flex gap-4 lg:gap-8">
+      <div className="flex justify-between lg:gap-8">
         {weekDays.map((day, index) => {
           const isTodayDate = isToday(day);
           return (

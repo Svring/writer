@@ -1,7 +1,6 @@
 @import "tailwindcss";
-
-@plugin "tailwind-scrollbar-hide";
 @import "tw-animate-css";
+@plugin "tailwind-scrollbar-hide";
 
 @source "../../node_modules/@daveyplate/better-auth-ui";
 
