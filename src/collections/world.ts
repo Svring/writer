@@ -1,14 +1,19 @@
+import slugify from "@sindresorhus/slugify";
 import {
   createInsertSchema,
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
 import type { CollectionConfig } from "payload";
+import type { z } from "zod";
 import { world } from "@/payload-generated-schema";
 
 export const WorldSelectSchema = createSelectSchema(world);
+export type WorldSelect = typeof WorldSelectSchema;
 export const WorldInsertSchema = createInsertSchema(world);
+export type WorldInsert = z.infer<typeof WorldInsertSchema>;
 export const WorldUpdateSchema = createUpdateSchema(world);
+export type WorldUpdate = typeof WorldUpdateSchema;
 
 export const World: CollectionConfig = {
   slug: "world",
@@ -117,8 +122,8 @@ export const World: CollectionConfig = {
     {
       name: "isPublic",
       type: "checkbox",
-      required: true,
-      defaultValue: true,
+      required: false,
+      defaultValue: false,
       label: "Is Public",
       admin: {
         description:
@@ -194,5 +199,22 @@ export const World: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeChange: [
+      ({ data, req }) => {
+        // Auto-generate slug from name whenever name is provided
+        if (data.name) {
+          data.slug = slugify(data.name);
+        }
+
+        // Set author from authenticated user if not already set
+        if (req.user && !data.author) {
+          data.author = req.user.id;
+        }
+
+        return data;
+      },
+    ],
+  },
   timestamps: true,
 };

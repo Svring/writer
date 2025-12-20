@@ -4,6 +4,7 @@ import { headers as getHeaders } from "next/headers.js";
 import { redirect } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import type React from "react";
+import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth.context";
 import SWRProvider from "@/contexts/swr.context";
@@ -47,7 +48,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         >
           <AuthProvider user={user}>
             <SWRProvider>
-              <main className="flex size-full">{children}</main>
+              <div className="flex size-full flex-col">
+                <SiteHeader />
+                <main className="flex size-full">{children}</main>
+              </div>
             </SWRProvider>
             <Toaster />
           </AuthProvider>

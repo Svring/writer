@@ -273,7 +273,7 @@ export interface World {
   /**
    * Public worlds are visible to everyone. Private worlds are drafts or co-writing spaces.
    */
-  isPublic: boolean;
+  isPublic?: boolean | null;
   /**
    * Tags for discovery (e.g., 'high-fantasy', 'litrpg', 'romance')
    */

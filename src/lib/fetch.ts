@@ -3,6 +3,7 @@ type FetcherOptions = {
   query?: Record<string, string | number | boolean | null | undefined>;
   header?: Record<string, string> | Headers;
   body?: unknown;
+  select?: (data: unknown) => unknown;
 };
 
 function buildUrl(path: string, query?: FetcherOptions["query"]): URL {
@@ -40,6 +41,7 @@ export async function fetcher({
   query,
   header,
   body,
+  select,
 }: FetcherOptions): Promise<unknown> {
   const url = buildUrl(path, query);
   const headers = new Headers(header);
@@ -55,5 +57,6 @@ export async function fetcher({
   }
 
   const response = await fetch(url.toString(), options);
-  return response.json();
+  const data = await response.json();
+  return select ? select(data) : data;
 }

@@ -7,22 +7,22 @@
  */
 
 import type {} from "@payloadcms/db-postgres";
-import { relations } from "@payloadcms/db-postgres/drizzle";
 import {
-  boolean,
-  foreignKey,
+  pgTable,
   index,
+  uniqueIndex,
+  foreignKey,
+  uuid,
+  varchar,
+  boolean,
+  timestamp,
   integer,
   jsonb,
   numeric,
-  pgEnum,
-  pgTable,
   serial,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
+  pgEnum,
 } from "@payloadcms/db-postgres/drizzle/pg-core";
+import { sql, relations } from "@payloadcms/db-postgres/drizzle";
 export const enum_users_role = pgEnum("enum_users_role", ["user", "admin"]);
 
 export const users = pgTable(
@@ -61,7 +61,7 @@ export const users = pgTable(
     uniqueIndex("users_email_idx").on(columns.email),
     index("users_updated_at_idx").on(columns.updatedAt),
     index("users_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const user_sessions = pgTable(
@@ -106,7 +106,7 @@ export const user_sessions = pgTable(
     index("user_sessions_impersonated_by_idx").on(columns.impersonatedBy),
     index("user_sessions_updated_at_idx").on(columns.updatedAt),
     index("user_sessions_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const user_accounts = pgTable(
@@ -155,7 +155,7 @@ export const user_accounts = pgTable(
     index("user_accounts_provider_id_idx").on(columns.providerId),
     index("user_accounts_updated_at_idx").on(columns.updatedAt),
     index("user_accounts_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const user_verifications = pgTable(
@@ -187,7 +187,7 @@ export const user_verifications = pgTable(
   (columns) => [
     index("user_verifications_updated_at_idx").on(columns.updatedAt),
     index("user_verifications_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const world_gallery = pgTable(
@@ -211,7 +211,7 @@ export const world_gallery = pgTable(
       foreignColumns: [world.id],
       name: "world_gallery_parent_id_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const world_tags = pgTable(
@@ -230,7 +230,7 @@ export const world_tags = pgTable(
       foreignColumns: [world.id],
       name: "world_tags_parent_id_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const world = pgTable(
@@ -257,7 +257,7 @@ export const world = pgTable(
       mode: "number",
     }).default(0),
     stats_storyCount: numeric("stats_story_count", { mode: "number" }).default(
-      0
+      0,
     ),
     stats_characterCount: numeric("stats_character_count", {
       mode: "number",
@@ -285,7 +285,7 @@ export const world = pgTable(
     index("world_author_idx").on(columns.author),
     index("world_updated_at_idx").on(columns.updatedAt),
     index("world_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const series_gallery = pgTable(
@@ -309,7 +309,7 @@ export const series_gallery = pgTable(
       foreignColumns: [series.id],
       name: "series_gallery_parent_id_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const series = pgTable(
@@ -340,7 +340,7 @@ export const series = pgTable(
       }),
     isPublic: boolean("is_public").notNull().default(true),
     stats_storyCount: numeric("stats_story_count", { mode: "number" }).default(
-      0
+      0,
     ),
     stats_viewCount: numeric("stats_view_count", { mode: "number" }).default(0),
     stats_likeCount: numeric("stats_like_count", { mode: "number" }).default(0),
@@ -370,7 +370,7 @@ export const series = pgTable(
     index("series_author_idx").on(columns.author),
     index("series_updated_at_idx").on(columns.updatedAt),
     index("series_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const story_gallery = pgTable(
@@ -394,7 +394,7 @@ export const story_gallery = pgTable(
       foreignColumns: [story.id],
       name: "story_gallery_parent_id_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const story = pgTable(
@@ -463,7 +463,7 @@ export const story = pgTable(
     index("story_author_idx").on(columns.author),
     index("story_updated_at_idx").on(columns.updatedAt),
     index("story_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const character_gallery = pgTable(
@@ -487,7 +487,7 @@ export const character_gallery = pgTable(
       foreignColumns: [character.id],
       name: "character_gallery_parent_id_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const character = pgTable(
@@ -542,7 +542,7 @@ export const character = pgTable(
     index("character_author_idx").on(columns.author),
     index("character_updated_at_idx").on(columns.updatedAt),
     index("character_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const character_rels = pgTable(
@@ -569,7 +569,7 @@ export const character_rels = pgTable(
       foreignColumns: [story.id],
       name: "character_rels_story_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const media = pgTable(
@@ -605,7 +605,7 @@ export const media = pgTable(
     index("media_updated_at_idx").on(columns.updatedAt),
     index("media_created_at_idx").on(columns.createdAt),
     uniqueIndex("media_filename_idx").on(columns.filename),
-  ]
+  ],
 );
 
 export const payload_kv = pgTable(
@@ -615,7 +615,7 @@ export const payload_kv = pgTable(
     key: varchar("key").notNull(),
     data: jsonb("data").notNull(),
   },
-  (columns) => [uniqueIndex("payload_kv_key_idx").on(columns.key)]
+  (columns) => [uniqueIndex("payload_kv_key_idx").on(columns.key)],
 );
 
 export const payload_locked_documents = pgTable(
@@ -642,7 +642,7 @@ export const payload_locked_documents = pgTable(
     index("payload_locked_documents_global_slug_idx").on(columns.globalSlug),
     index("payload_locked_documents_updated_at_idx").on(columns.updatedAt),
     index("payload_locked_documents_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const payload_locked_documents_rels = pgTable(
@@ -668,19 +668,19 @@ export const payload_locked_documents_rels = pgTable(
     index("payload_locked_documents_rels_path_idx").on(columns.path),
     index("payload_locked_documents_rels_users_id_idx").on(columns.usersID),
     index("payload_locked_documents_rels_user_sessions_id_idx").on(
-      columns["user-sessionsID"]
+      columns["user-sessionsID"],
     ),
     index("payload_locked_documents_rels_user_accounts_id_idx").on(
-      columns["user-accountsID"]
+      columns["user-accountsID"],
     ),
     index("payload_locked_documents_rels_user_verifications_id_idx").on(
-      columns["user-verificationsID"]
+      columns["user-verificationsID"],
     ),
     index("payload_locked_documents_rels_world_id_idx").on(columns.worldID),
     index("payload_locked_documents_rels_series_id_idx").on(columns.seriesID),
     index("payload_locked_documents_rels_story_id_idx").on(columns.storyID),
     index("payload_locked_documents_rels_character_id_idx").on(
-      columns.characterID
+      columns.characterID,
     ),
     index("payload_locked_documents_rels_media_id_idx").on(columns.mediaID),
     foreignKey({
@@ -733,7 +733,7 @@ export const payload_locked_documents_rels = pgTable(
       foreignColumns: [media.id],
       name: "payload_locked_documents_rels_media_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const payload_preferences = pgTable(
@@ -761,7 +761,7 @@ export const payload_preferences = pgTable(
     index("payload_preferences_key_idx").on(columns.key),
     index("payload_preferences_updated_at_idx").on(columns.updatedAt),
     index("payload_preferences_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const payload_preferences_rels = pgTable(
@@ -788,7 +788,7 @@ export const payload_preferences_rels = pgTable(
       foreignColumns: [users.id],
       name: "payload_preferences_rels_users_fk",
     }).onDelete("cascade"),
-  ]
+  ],
 );
 
 export const payload_migrations = pgTable(
@@ -815,7 +815,7 @@ export const payload_migrations = pgTable(
   (columns) => [
     index("payload_migrations_updated_at_idx").on(columns.updatedAt),
     index("payload_migrations_created_at_idx").on(columns.createdAt),
-  ]
+  ],
 );
 
 export const relations_users = relations(users, () => ({}));
@@ -840,7 +840,7 @@ export const relations_user_accounts = relations(user_accounts, ({ one }) => ({
 }));
 export const relations_user_verifications = relations(
   user_verifications,
-  () => ({})
+  () => ({}),
 );
 export const relations_world_gallery = relations(world_gallery, ({ one }) => ({
   _parentID: one(world, {
@@ -897,7 +897,7 @@ export const relations_series_gallery = relations(
       references: [media.id],
       relationName: "image",
     }),
-  })
+  }),
 );
 export const relations_series = relations(series, ({ one, many }) => ({
   world: one(world, {
@@ -974,7 +974,7 @@ export const relations_character_gallery = relations(
       references: [media.id],
       relationName: "image",
     }),
-  })
+  }),
 );
 export const relations_character_rels = relations(
   character_rels,
@@ -989,7 +989,7 @@ export const relations_character_rels = relations(
       references: [story.id],
       relationName: "story",
     }),
-  })
+  }),
 );
 export const relations_character = relations(character, ({ one, many }) => ({
   world: one(world, {
@@ -1074,7 +1074,7 @@ export const relations_payload_locked_documents_rels = relations(
       references: [media.id],
       relationName: "media",
     }),
-  })
+  }),
 );
 export const relations_payload_locked_documents = relations(
   payload_locked_documents,
@@ -1082,7 +1082,7 @@ export const relations_payload_locked_documents = relations(
     _rels: many(payload_locked_documents_rels, {
       relationName: "_rels",
     }),
-  })
+  }),
 );
 export const relations_payload_preferences_rels = relations(
   payload_preferences_rels,
@@ -1097,7 +1097,7 @@ export const relations_payload_preferences_rels = relations(
       references: [users.id],
       relationName: "users",
     }),
-  })
+  }),
 );
 export const relations_payload_preferences = relations(
   payload_preferences,
@@ -1105,11 +1105,11 @@ export const relations_payload_preferences = relations(
     _rels: many(payload_preferences_rels, {
       relationName: "_rels",
     }),
-  })
+  }),
 );
 export const relations_payload_migrations = relations(
   payload_migrations,
-  () => ({})
+  () => ({}),
 );
 
 type DatabaseSchema = {

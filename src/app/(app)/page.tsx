@@ -5,10 +5,10 @@ import { EditorContainer, Editor as EditorContent } from "@/components/editor";
 import { DndKit } from "@/components/editor/plugins/dnd-kit";
 import { FloatingToolbarKit } from "@/components/editor/plugins/floating-toolbar-kit";
 import { ToolbarButtons } from "@/components/editor/toolbar-buttons";
+import { EditorCoin } from "@/components/editor-coin";
 import { Timeline } from "@/components/timeline";
-import { Button } from "@/components/ui/button";
 import { FixedToolbar } from "@/components/ui/fixed-toolbar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export default function HomePage() {
   const editor = usePlateEditor({
@@ -17,11 +17,9 @@ export default function HomePage() {
 
   return (
     <Sheet data-slot="editor-sheet">
+      <EditorCoin />
       <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-2 p-6">
         <Timeline />
-        <SheetTrigger asChild>
-          <Button>Open</Button>
-        </SheetTrigger>
       </div>
 
       <SheetContent
