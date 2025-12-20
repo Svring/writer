@@ -8,7 +8,7 @@ export function EditorCoin() {
   return (
     <SheetTrigger asChild>
       <Button
-        className="fixed bottom-6 left-6 z-50 size-12 rounded-full shadow-lg"
+        className="fixed bottom-6 left-6 z-50 size-12 cursor-pointer rounded-full shadow-lg"
         size="icon"
         variant="default"
       >

@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowUpToLineIcon, ChevronDown, ChevronRight } from "lucide-react";
 import { useEditorReadOnly } from "platejs/react";
+import { ExportToolbarButton } from "@/components/ui/export-toolbar-button";
 import {
   RedoToolbarButton,
   UndoToolbarButton,
@@ -33,6 +34,9 @@ export function ToolbarButtons() {
 
           <div className="flex">
             <ToolbarGroup>
+              <ExportToolbarButton>
+                <ArrowUpToLineIcon />
+              </ExportToolbarButton>
               <ToolbarButton>
                 <ChevronRight />
               </ToolbarButton>

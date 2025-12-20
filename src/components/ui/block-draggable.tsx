@@ -16,8 +16,12 @@ import {
   useSelected,
 } from "platejs/react";
 import * as React from "react";
-
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
@@ -164,12 +168,11 @@ function Draggable(props: PlateElementProps) {
                 isInColumn && "mr-1.5"
               )}
             >
-              <Button
+              <div
                 className="absolute left-0 h-6 w-full p-0"
                 data-plate-prevent-deselect
                 ref={handleRef}
                 style={{ top: `${dragButtonTop + 3}px` }}
-                variant="ghost"
               >
                 <DragHandle
                   isDragging={isDragging}
@@ -177,7 +180,7 @@ function Draggable(props: PlateElementProps) {
                   resetPreview={resetPreview}
                   setPreviewTop={setPreviewTop}
                 />
-              </Button>
+              </div>
             </div>
           </div>
         </Gutter>
@@ -255,9 +258,8 @@ const DragHandle = React.memo(
     const editor = useEditorRef();
     const currentElement = useElement();
 
-    const handleClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      editor.getApi(BlockSelectionPlugin).blockSelection.focus();
+    const handleClick = () => {
+      // Click is handled by DropdownMenuTrigger, block selection is handled in onOpenChange
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -356,20 +358,34 @@ const DragHandle = React.memo(
     };
 
     return (
-      <button
-        className="flex size-full cursor-pointer items-center justify-center border-none bg-transparent p-0"
-        data-plate-prevent-deselect
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        onMouseDown={handleMouseDown}
-        onMouseEnter={handleMouseEnter}
-        onMouseUp={() => {
-          handleResetPreview();
-        }}
-        type="button"
-      >
-        <GripVertical className="text-muted-foreground" />
-      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className="flex size-full cursor-pointer items-center justify-center border-none bg-transparent p-0"
+            data-plate-prevent-deselect
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            onMouseDown={handleMouseDown}
+            onMouseEnter={handleMouseEnter}
+            onMouseUp={() => {
+              handleResetPreview();
+            }}
+            type="button"
+          >
+            <GripVertical className="text-muted-foreground" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" side="left">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              // Vocalize functionality will be added here
+            }}
+          >
+            Vocalize
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 );
