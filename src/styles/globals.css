@@ -6,6 +6,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "TokyoFont";
+  src: url("/tokyo-font.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-tokyo {
+  font-family: "TokyoFont", sans-serif;
+}
+
 @theme {
   --color-background-0: #000000;
 

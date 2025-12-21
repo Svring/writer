@@ -2,7 +2,6 @@
 
 import { DndPlugin, useDraggable, useDropLine } from "@platejs/dnd";
 import { expandListItemsWithChildren } from "@platejs/list";
-import { BlockSelectionPlugin } from "@platejs/selection/react";
 import { GripVertical } from "lucide-react";
 import { getPluginByType, isType, KEYS, type TElement } from "platejs";
 import {
@@ -12,8 +11,6 @@ import {
   type RenderNodeWrapper,
   useEditorRef,
   useElement,
-  usePluginOption,
-  useSelected,
 } from "platejs/react";
 import * as React from "react";
 import {
@@ -93,17 +90,11 @@ export const BlockDraggable: RenderNodeWrapper = (props) => {
 
 function Draggable(props: PlateElementProps) {
   const { children, editor, element, path } = props;
-  const blockSelectionApi = editor.getApi(BlockSelectionPlugin).blockSelection;
 
   const { isAboutToDrag, isDragging, nodeRef, previewRef, handleRef } =
     useDraggable({
       element,
-      onDropHandler: (_, { dragItem }) => {
-        const id = (dragItem as { id: string[] | string }).id;
-
-        if (blockSelectionApi) {
-          blockSelectionApi.add(id);
-        }
+      onDropHandler: () => {
         resetPreview();
       },
     });
@@ -194,15 +185,7 @@ function Draggable(props: PlateElementProps) {
       />
 
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-      <div
-        className="slate-blockWrapper flow-root"
-        onContextMenu={(event) => {
-          editor
-            .getApi(BlockSelectionPlugin)
-            .blockSelection.addOnContextMenu({ element, event });
-        }}
-        ref={nodeRef}
-      >
+      <div className="slate-blockWrapper flow-root" ref={nodeRef}>
         <MemoizedChildren>{children}</MemoizedChildren>
         <DropLine />
       </div>
@@ -217,11 +200,6 @@ function Gutter({
 }: React.ComponentProps<"div">) {
   const editor = useEditorRef();
   const element = useElement();
-  const isSelectionAreaVisible = usePluginOption(
-    BlockSelectionPlugin,
-    "isSelectionAreaVisible"
-  );
-  const selected = useSelected();
 
   return (
     <div
@@ -232,8 +210,6 @@ function Gutter({
         getPluginByType(editor, element.type)?.node.isContainer
           ? "group-hover/container:opacity-100"
           : "group-hover:opacity-100",
-        isSelectionAreaVisible && "hidden",
-        !selected && "opacity-0",
         className
       )}
       contentEditable={false}
@@ -265,7 +241,6 @@ const DragHandle = React.memo(
     const handleKeyDown = (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        editor.getApi(BlockSelectionPlugin).blockSelection.focus();
       }
     };
 
@@ -276,43 +251,27 @@ const DragHandle = React.memo(
         return;
       }
 
-      const blockSelection = editor
-        .getApi(BlockSelectionPlugin)
-        .blockSelection.getNodes({ sort: true });
-
-      let selectionNodes =
-        blockSelection.length > 0
-          ? blockSelection
-          : editor.api.blocks({ mode: "highest" });
-
-      // If current block is not in selection, use it as the starting point
+      // Get current block and any list children
       const elementPath = editor.api.findPath(currentElement);
-      if (
-        !selectionNodes.some(([node]) => node.id === currentElement.id) &&
-        elementPath
-      ) {
-        selectionNodes = [[currentElement, elementPath]];
+      if (!elementPath) {
+        return;
       }
 
-      // Process selection nodes to include list children
+      const selectionNodes: [TElement, number[]][] = [
+        [currentElement, elementPath],
+      ];
       const blocks = expandListItemsWithChildren(editor, selectionNodes).map(
         ([node]) => node
       );
 
-      if (blockSelection.length === 0) {
-        editor.tf.blur();
-        editor.tf.collapse();
-      }
+      editor.tf.blur();
+      editor.tf.collapse();
 
       const elements = createDragPreviewElements(editor, blocks);
       dragPreviewRef.current?.append(...elements);
       dragPreviewRef.current?.classList.remove("hidden");
       dragPreviewRef.current?.classList.add("opacity-0");
       editor.setOption(DndPlugin, "multiplePreviewRef", dragPreviewRef);
-
-      editor
-        .getApi(BlockSelectionPlugin)
-        .blockSelection.set(blocks.map((block) => block.id as string));
     };
 
     const handleMouseEnter = () => {
@@ -320,33 +279,21 @@ const DragHandle = React.memo(
         return;
       }
 
-      const blockSelection = editor
-        .getApi(BlockSelectionPlugin)
-        .blockSelection.getNodes({ sort: true });
-
-      let selectedBlocks =
-        blockSelection.length > 0
-          ? blockSelection
-          : editor.api.blocks({ mode: "highest" });
-
-      // If current block is not in selection, use it as the starting point
+      // Use current block for preview
       const elementPath = editor.api.findPath(currentElement);
-      if (
-        !selectedBlocks.some(([node]) => node.id === currentElement.id) &&
-        elementPath
-      ) {
-        selectedBlocks = [[currentElement, elementPath]];
+      if (!elementPath) {
+        return;
       }
 
-      // Process selection to include list children
+      const selectedBlocks: [TElement, number[]][] = [
+        [currentElement, elementPath],
+      ];
       const processedBlocks = expandListItemsWithChildren(
         editor,
         selectedBlocks
       );
 
-      const ids = processedBlocks.map((block) => block[0].id as string);
-
-      if (ids.length > 1 && ids.includes(currentElement.id as string)) {
+      if (processedBlocks.length > 0) {
         const previewTop = calculatePreviewTop(editor, {
           blocks: processedBlocks.map((block) => block[0]),
           element: currentElement,

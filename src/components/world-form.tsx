@@ -101,8 +101,8 @@ export function WorldForm({
         </form.Field>
       </FieldGroup>
 
-      <div className="mt-6 flex justify-end gap-2">
-        <Button type="submit">Create World</Button>
+      <div className="mt-6">
+        <Button className="w-full" type="submit">Create World</Button>
       </div>
     </form>
   );

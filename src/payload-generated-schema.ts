@@ -252,7 +252,7 @@ export const world = pgTable(
       .references(() => users.id, {
         onDelete: "set null",
       }),
-    isPublic: boolean("is_public").notNull().default(true),
+    isPublic: boolean("is_public").default(false),
     stats_seriesCount: numeric("stats_series_count", {
       mode: "number",
     }).default(0),

@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/history-toolbar-button";
 import { SheetClose } from "@/components/ui/sheet";
 import { ToolbarButton, ToolbarGroup } from "@/components/ui/toolbar";
+import { useEditorContext } from "@/contexts/editor.context";
 
 export function ToolbarButtons() {
   const readOnly = useEditorReadOnly();
+  const { setSaving } = useEditorContext();
 
   return (
     <div className="flex w-full">
@@ -37,7 +39,7 @@ export function ToolbarButtons() {
               <ExportToolbarButton>
                 <ArrowUpToLineIcon />
               </ExportToolbarButton>
-              <ToolbarButton>
+              <ToolbarButton onClick={() => setSaving(true)}>
                 <ChevronRight />
               </ToolbarButton>
             </ToolbarGroup>

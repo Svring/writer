@@ -1,55 +1,21 @@
 "use client";
 
 import { VisuallyHidden } from "@ariakit/react";
-import { useLocalStorage } from "@reactuses/core";
-import { Plate, usePlateEditor } from "platejs/react";
-import { useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft } from "lucide-react";
+import { Plate } from "platejs/react";
 import { EditorContainer, Editor as EditorContent } from "@/components/editor";
-import { AutoformatKit } from "@/components/editor/plugins/autoformat-kit";
-import { BaseBasicBlocksKit } from "@/components/editor/plugins/basic-blocks-base-kit";
-import { DndKit } from "@/components/editor/plugins/dnd-kit";
-import { FloatingToolbarKit } from "@/components/editor/plugins/floating-toolbar-kit";
-import { IndentKit } from "@/components/editor/plugins/indent-kit";
-import { ListKit } from "@/components/editor/plugins/list-kit";
-import { MarkdownKit } from "@/components/editor/plugins/markdown-kit";
-import { SlashKit } from "@/components/editor/plugins/slash-kit";
-import { ToggleKit } from "@/components/editor/plugins/toggle-kit";
 import { ToolbarButtons } from "@/components/editor/toolbar-buttons";
 import { EditorCoin } from "@/components/editor-coin";
+import { StoryForm } from "@/components/story-form";
 import { Timeline } from "@/components/timeline";
+import { Button } from "@/components/ui/button";
 import { FixedToolbar } from "@/components/ui/fixed-toolbar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useEditorContext } from "@/contexts/editor.context";
 
 export default function HomePage() {
-  const [values, setValues] = useLocalStorage("editor-values", "");
-
-  // Track if we've loaded initial value to prevent race condition
-  const hasLoadedInitialValue = useRef(false);
-
-  const editor = usePlateEditor({
-    plugins: [
-      ...BaseBasicBlocksKit,
-      ...FloatingToolbarKit,
-      ...DndKit,
-      ...MarkdownKit,
-      ...ToggleKit,
-      ...AutoformatKit,
-      ...ListKit,
-      ...IndentKit,
-      ...SlashKit,
-    ],
-  });
-
-  // Load from local storage on mount (handles race condition)
-  useEffect(() => {
-    if (!hasLoadedInitialValue.current && values) {
-      const parsed = JSON.parse(values);
-      if (parsed.length > 0) {
-        editor.tf.setValue(parsed);
-        hasLoadedInitialValue.current = true;
-      }
-    }
-  }, [values, editor.tf]);
+  const { editor, onChange, saving, onSaved, setSaving } = useEditorContext();
 
   return (
     <Sheet data-slot="editor-sheet">
@@ -68,19 +34,59 @@ export default function HomePage() {
         <VisuallyHidden>
           <SheetTitle>Editor</SheetTitle>
         </VisuallyHidden>
-        <Plate
-          editor={editor}
-          onChange={(editorWrapper) =>
-            setValues(JSON.stringify(editorWrapper.editor.children))
-          }
-        >
-          <FixedToolbar>
-            <ToolbarButtons />
-          </FixedToolbar>
-          <EditorContainer>
-            <EditorContent />
-          </EditorContainer>
-        </Plate>
+        <AnimatePresence mode="wait">
+          {saving ? (
+            <motion.div
+              animate={{ opacity: 1, x: 0 }}
+              className="relative flex flex-1 flex-col"
+              exit={{ opacity: 0, x: 100 }}
+              initial={{ opacity: 0, x: 100 }}
+              key="story-form"
+              transition={{ duration: 0.1 }}
+            >
+              <Button
+                className="absolute top-4 left-4 z-10"
+                onClick={() => setSaving(false)}
+                size="sm"
+                variant="ghost"
+              >
+                <ChevronLeft className="size-4" />
+                Back
+              </Button>
+              <div className="flex flex-1 items-center justify-center">
+                <div className="max-w-sm flex-1">
+                  <StoryForm
+                    defaultValues={{ content: editor?.children }}
+                    onSubmit={onSaved}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              animate={{ opacity: 1, x: 0 }}
+              className="relative flex flex-1 flex-col"
+              exit={{ opacity: 0, x: -100 }}
+              initial={{ opacity: 0, x: -100 }}
+              key="editor"
+              transition={{ duration: 0.1 }}
+            >
+              <Plate editor={editor} onChange={onChange}>
+                <FixedToolbar>
+                  <ToolbarButtons />
+                </FixedToolbar>
+                <EditorContainer
+                  style={{
+                    fontFamily:
+                      '"New York", -apple-system-ui-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
+                  }}
+                >
+                  <EditorContent />
+                </EditorContainer>
+              </Plate>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </SheetContent>
     </Sheet>
   );

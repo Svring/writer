@@ -426,9 +426,9 @@ export interface Story {
    */
   slug: string;
   /**
-   * The world/universe this story belongs to (required - story always belongs to exactly one world)
+   * The world/universe this story belongs to (optional)
    */
-  world: string | World;
+  world?: (string | null) | World;
   /**
    * The series this story belongs to (omit for standalone/one-shot stories)
    */
@@ -438,9 +438,9 @@ export interface Story {
    */
   seriesOrder?: number | null;
   /**
-   * Markdown / full chapter text (required when published)
+   * Markdown / full chapter text
    */
-  content?:
+  content:
     | {
         [k: string]: unknown;
       }

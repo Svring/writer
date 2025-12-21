@@ -1,4 +1,19 @@
+import slugify from "@sindresorhus/slugify";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import type { CollectionConfig } from "payload";
+import type { z } from "zod";
+import { story } from "@/payload-generated-schema";
+
+export const StorySelectSchema = createSelectSchema(story);
+export type StorySelect = typeof StorySelectSchema;
+export const StoryInsertSchema = createInsertSchema(story);
+export type StoryInsert = z.infer<typeof StoryInsertSchema>;
+export const StoryUpdateSchema = createUpdateSchema(story);
+export type StoryUpdate = typeof StoryUpdateSchema;
 
 export const Story: CollectionConfig = {
   slug: "story",
@@ -41,11 +56,10 @@ export const Story: CollectionConfig = {
       name: "world",
       type: "relationship",
       relationTo: "world",
-      required: true,
+      required: false,
       label: "World",
       admin: {
-        description:
-          "The world/universe this story belongs to (required - story always belongs to exactly one world)",
+        description: "The world/universe this story belongs to (optional)",
       },
     },
     {
@@ -72,10 +86,10 @@ export const Story: CollectionConfig = {
     {
       name: "content",
       type: "json",
-      required: false,
+      required: true,
       label: "Content",
       admin: {
-        description: "Markdown / full chapter text (required when published)",
+        description: "Markdown / full chapter text",
       },
     },
     {
@@ -220,5 +234,22 @@ export const Story: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeChange: [
+      ({ data, req }) => {
+        // Auto-generate slug from title whenever title is provided
+        if (data.title && !data.slug) {
+          data.slug = slugify(data.title);
+        }
+
+        // Set author from authenticated user if not already set
+        if (req.user && !data.author) {
+          data.author = req.user.id;
+        }
+
+        return data;
+      },
+    ],
+  },
   timestamps: true,
 };

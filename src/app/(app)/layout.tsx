@@ -7,6 +7,7 @@ import type React from "react";
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/auth.context";
+import { EditorProvider } from "@/contexts/editor.context";
 import SWRProvider from "@/contexts/swr.context";
 import { getUserFromHeaders } from "@/lib/header";
 
@@ -48,10 +49,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         >
           <AuthProvider user={user}>
             <SWRProvider>
-              <div className="flex size-full flex-col">
-                <SiteHeader />
-                <main className="flex size-full">{children}</main>
-              </div>
+              <EditorProvider>
+                <div className="flex size-full flex-col">
+                  <SiteHeader />
+                  <main className="flex size-full">{children}</main>
+                </div>
+              </EditorProvider>
             </SWRProvider>
             <Toaster />
           </AuthProvider>
