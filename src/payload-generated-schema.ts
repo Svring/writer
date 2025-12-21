@@ -403,16 +403,14 @@ export const story = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     title: varchar("title").notNull(),
     slug: varchar("slug").notNull(),
-    world: uuid("world_id")
-      .notNull()
-      .references(() => world.id, {
-        onDelete: "set null",
-      }),
+    world: uuid("world_id").references(() => world.id, {
+      onDelete: "set null",
+    }),
     series: uuid("series_id").references(() => series.id, {
       onDelete: "set null",
     }),
     seriesOrder: numeric("series_order", { mode: "number" }),
-    content: jsonb("content"),
+    content: jsonb("content").notNull(),
     tagline: varchar("tagline"),
     coverImage: uuid("cover_image_id").references(() => media.id, {
       onDelete: "set null",

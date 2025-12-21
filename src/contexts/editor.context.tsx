@@ -51,6 +51,7 @@ export function EditorProvider({ children }: EditorProviderProps) {
   const [story, setStory] = useState<Story | null>(null);
 
   const hasLoadedInitialValue = useRef(false);
+  const loadedStoryIdRef = useRef<string | null>(null);
 
   const editor = usePlateEditor({
     plugins: [
@@ -87,15 +88,26 @@ export function EditorProvider({ children }: EditorProviderProps) {
       })
   );
 
-  // Load from local storage on mount (only if no story loaded)
+  // Load content: prioritize story content, reload when story changes
   useEffect(() => {
-    if (hasLoadedInitialValue.current || story || !values) {
+    // If story is present, always load from story (even if already loaded)
+    if (story?.content) {
+      // Only reload if it's a different story
+      if (loadedStoryIdRef.current !== story.id) {
+        editor.tf.setValue(story.content as Value);
+        loadedStoryIdRef.current = story.id;
+        hasLoadedInitialValue.current = true;
+      }
       return;
     }
-    const parsed = JSON.parse(values);
-    if (parsed.length > 0) {
-      editor.tf.setValue(parsed);
-      hasLoadedInitialValue.current = true;
+
+    // Only load from local storage if no story and not already loaded
+    if (!hasLoadedInitialValue.current && values) {
+      const parsed = JSON.parse(values);
+      if (parsed.length > 0) {
+        editor.tf.setValue(parsed);
+        hasLoadedInitialValue.current = true;
+      }
     }
   }, [values, editor.tf, story]);
 
@@ -122,16 +134,14 @@ export function EditorProvider({ children }: EditorProviderProps) {
       const newStory = await createStory(storyData);
       setStory(newStory);
       editor.tf.setValue(newStory.content as Value);
+      loadedStoryIdRef.current = newStory.id;
     } finally {
       setSaving(false);
     }
   };
 
   const onUpdateStory = async (storyData: Partial<StoryInsert>) => {
-    const updatedStory = await updateStory(storyData);
-    if (updatedStory) {
-      setStory(updatedStory);
-    }
+    await updateStory(storyData);
   };
 
   return (

@@ -4,27 +4,24 @@ import { VisuallyHidden } from "@ariakit/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { Plate } from "platejs/react";
+import type React from "react";
 import { EditorContainer, Editor as EditorContent } from "@/components/editor";
 import { ToolbarButtons } from "@/components/editor/toolbar-buttons";
 import { EditorCoin } from "@/components/editor-coin";
 import { StoryForm } from "@/components/story-form";
-import { Timeline } from "@/components/timeline";
 import { Button } from "@/components/ui/button";
 import { FixedToolbar } from "@/components/ui/fixed-toolbar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useEditorContext } from "@/contexts/editor.context";
 
-export default function HomePage() {
+export default function V0Layout({ children }: { children: React.ReactNode }) {
   const { editor, onChange, saving, onCreateStory, setSaving } =
     useEditorContext();
 
   return (
     <Sheet data-slot="editor-sheet">
       <EditorCoin />
-      <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-2 p-6">
-        <Timeline />
-      </div>
-
+      {children}
       <SheetContent
         aria-describedby={undefined}
         className="h-full gap-0 border-none duration-250! ease-out"
