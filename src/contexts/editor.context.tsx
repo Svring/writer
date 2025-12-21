@@ -1,6 +1,8 @@
 "use client";
 
 import { useLocalStorage } from "@reactuses/core";
+import { asyncDebounce } from "@tanstack/pacer";
+import type { Editor, Value } from "platejs";
 import { usePlateEditor } from "platejs/react";
 import {
   createContext,
@@ -22,13 +24,17 @@ import { MarkdownKit } from "@/components/editor/plugins/markdown-kit";
 import { SlashKit } from "@/components/editor/plugins/slash-kit";
 import { ToggleKit } from "@/components/editor/plugins/toggle-kit";
 import { fetcher } from "@/lib/fetch";
+import type { Story } from "@/payload-types";
 
 type EditorContextValue = {
   editor: ReturnType<typeof usePlateEditor>;
-  onChange: (editorWrapper: { editor: { children: unknown } }) => void;
+  onChange: (editorWrapper: { editor: Editor<Value> }) => void;
   saving: boolean;
   setSaving: (value: boolean) => void;
-  onSaved: (storyData: Partial<StoryInsert>) => Promise<void>;
+  onCreateStory: (storyData: Partial<StoryInsert>) => Promise<void>;
+  onUpdateStory: (storyData: Partial<StoryInsert>) => Promise<void>;
+  story: Story | null;
+  setStory: (story: Story | null) => void;
 };
 
 export const EditorContext = createContext<EditorContextValue | undefined>(
@@ -42,8 +48,8 @@ type EditorProviderProps = {
 export function EditorProvider({ children }: EditorProviderProps) {
   const [values, setValues] = useLocalStorage("editor-values", "");
   const [saving, setSaving] = useState(false);
+  const [story, setStory] = useState<Story | null>(null);
 
-  // Track if we've loaded initial value to prevent race condition
   const hasLoadedInitialValue = useRef(false);
 
   const editor = usePlateEditor({
@@ -63,35 +69,83 @@ export function EditorProvider({ children }: EditorProviderProps) {
   const { trigger: createStory } = useSWRMutation(
     "/api/story",
     (url, { arg }: { arg: Partial<StoryInsert> }) =>
-      fetcher({ path: url, body: arg })
+      fetcher<Story>({
+        path: url,
+        body: arg,
+        select: (data: unknown) => (data as { doc: Story }).doc,
+      })
   );
 
-  // Load from local storage on mount (handles race condition)
-  useEffect(() => {
-    if (!hasLoadedInitialValue.current && values) {
-      const parsed = JSON.parse(values);
-      if (parsed.length > 0) {
-        editor.tf.setValue(parsed);
-        hasLoadedInitialValue.current = true;
-      }
-    }
-  }, [values, editor.tf]);
+  const { trigger: updateStory } = useSWRMutation(
+    story ? `/api/story/${story.id}` : null,
+    (url, { arg }: { arg: Partial<StoryInsert> }) =>
+      fetcher<Story>({
+        path: url,
+        body: arg,
+        method: "PATCH",
+        select: (data: unknown) => (data as { doc: Story }).doc,
+      })
+  );
 
-  const onChange = (editorWrapper: { editor: { children: unknown } }) => {
-    setValues(JSON.stringify(editorWrapper.editor.children));
+  // Load from local storage on mount (only if no story loaded)
+  useEffect(() => {
+    if (hasLoadedInitialValue.current || story || !values) {
+      return;
+    }
+    const parsed = JSON.parse(values);
+    if (parsed.length > 0) {
+      editor.tf.setValue(parsed);
+      hasLoadedInitialValue.current = true;
+    }
+  }, [values, editor.tf, story]);
+
+  const debouncedUpdate = useRef(
+    asyncDebounce(
+      async (content: Value) => {
+        await onUpdateStory({ content });
+      },
+      { wait: 500 }
+    )
+  ).current;
+
+  const onChange = (editorWrapper: { editor: Editor<Value> }) => {
+    const content = editorWrapper.editor.children;
+    setValues(JSON.stringify(content));
+
+    if (story) {
+      debouncedUpdate(content);
+    }
   };
 
-  const onSaved = async (storyData: Partial<StoryInsert>) => {
+  const onCreateStory = async (storyData: Partial<StoryInsert>) => {
     try {
-      await createStory(storyData);
+      const newStory = await createStory(storyData);
+      setStory(newStory);
+      editor.tf.setValue(newStory.content as Value);
     } finally {
       setSaving(false);
     }
   };
 
+  const onUpdateStory = async (storyData: Partial<StoryInsert>) => {
+    const updatedStory = await updateStory(storyData);
+    if (updatedStory) {
+      setStory(updatedStory);
+    }
+  };
+
   return (
     <EditorContext.Provider
-      value={{ editor, onChange, saving, setSaving, onSaved }}
+      value={{
+        editor,
+        onChange,
+        saving,
+        setSaving,
+        onCreateStory,
+        onUpdateStory,
+        story,
+        setStory,
+      }}
     >
       {children}
     </EditorContext.Provider>

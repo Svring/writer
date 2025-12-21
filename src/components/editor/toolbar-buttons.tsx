@@ -1,6 +1,11 @@
 "use client";
 
-import { ArrowUpToLineIcon, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  ArrowUpToLineIcon,
+  ChevronDown,
+  ChevronRight,
+  Save,
+} from "lucide-react";
 import { useEditorReadOnly } from "platejs/react";
 import { ExportToolbarButton } from "@/components/ui/export-toolbar-button";
 import {
@@ -13,13 +18,13 @@ import { useEditorContext } from "@/contexts/editor.context";
 
 export function ToolbarButtons() {
   const readOnly = useEditorReadOnly();
-  const { setSaving } = useEditorContext();
+  const { setSaving, story, editor, onUpdateStory } = useEditorContext();
 
   return (
     <div className="flex w-full">
       {!readOnly && (
-        <div className="flex w-full justify-between">
-          <div className="flex">
+        <div className="flex w-full">
+          <div className="flex flex-1">
             <ToolbarGroup>
               <SheetClose asChild data-slot="editor-sheet-close">
                 <ToolbarButton>
@@ -34,14 +39,34 @@ export function ToolbarButtons() {
             </ToolbarGroup>
           </div>
 
-          <div className="flex">
+          <div className="flex flex-1 items-center justify-center">
+            {story?.title ? (
+              <span className="truncate font-medium text-sm">
+                {story.title}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="flex flex-1 justify-end">
             <ToolbarGroup>
               <ExportToolbarButton>
                 <ArrowUpToLineIcon />
               </ExportToolbarButton>
-              <ToolbarButton onClick={() => setSaving(true)}>
-                <ChevronRight />
-              </ToolbarButton>
+              {story ? (
+                <ToolbarButton
+                  onClick={() =>
+                    onUpdateStory({
+                      content: editor?.children,
+                    })
+                  }
+                >
+                  <Save />
+                </ToolbarButton>
+              ) : (
+                <ToolbarButton onClick={() => setSaving(true)}>
+                  <ChevronRight />
+                </ToolbarButton>
+              )}
             </ToolbarGroup>
           </div>
         </div>

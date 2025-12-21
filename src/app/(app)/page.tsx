@@ -15,7 +15,8 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useEditorContext } from "@/contexts/editor.context";
 
 export default function HomePage() {
-  const { editor, onChange, saving, onSaved, setSaving } = useEditorContext();
+  const { editor, onChange, saving, onCreateStory, setSaving } =
+    useEditorContext();
 
   return (
     <Sheet data-slot="editor-sheet">
@@ -57,7 +58,7 @@ export default function HomePage() {
                 <div className="max-w-sm flex-1">
                   <StoryForm
                     defaultValues={{ content: editor?.children }}
-                    onSubmit={onSaved}
+                    onSubmit={onCreateStory}
                   />
                 </div>
               </div>

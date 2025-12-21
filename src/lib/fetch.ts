@@ -3,6 +3,7 @@ type FetcherOptions = {
   query?: Record<string, string | number | boolean | null | undefined>;
   header?: Record<string, string> | Headers;
   body?: unknown;
+  method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   select?: (data: unknown) => unknown;
 };
 
@@ -36,19 +37,20 @@ function prepareBody(body: unknown, headers: Headers): BodyInit | undefined {
   return JSON.stringify(body);
 }
 
-export async function fetcher({
+export async function fetcher<T>({
   path,
   query,
   header,
   body,
+  method,
   select,
-}: FetcherOptions): Promise<unknown> {
+}: FetcherOptions): Promise<T> {
   const url = buildUrl(path, query);
   const headers = new Headers(header);
   const requestBody = prepareBody(body, headers);
 
   const options: RequestInit = {
-    method: body !== undefined ? "POST" : "GET",
+    method: method ?? (body !== undefined ? "POST" : "GET"),
     headers,
   };
 
@@ -57,6 +59,6 @@ export async function fetcher({
   }
 
   const response = await fetch(url.toString(), options);
-  const data = await response.json();
-  return select ? select(data) : data;
+  const data = (await response.json()) as T;
+  return select ? (select(data) as T) : data;
 }

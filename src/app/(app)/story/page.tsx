@@ -1,10 +1,9 @@
 "use client";
 
-import { useHover } from "@reactuses/core";
-import { AnimatePresence, motion } from "framer-motion";
-import { Pencil, Trash } from "lucide-react";
-import { useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import { Trash } from "lucide-react";
 import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 import {
   Item,
   ItemActions,
@@ -13,67 +12,53 @@ import {
   ItemGroup,
   ItemTitle,
 } from "@/components/ui/item";
+import { fetcher } from "@/lib/fetch";
 import type { Story } from "@/payload-types";
 
-function StoryListItem({ story }: { story: Story }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const hovered = useHover(ref);
+function StoryListItem({
+  story,
+  onDelete,
+}: {
+  story: Story;
+  onDelete: () => Promise<void>;
+}) {
+  const { trigger: deleteStory } = useSWRMutation(
+    `/api/story/${story.id}`,
+    (url) => fetcher({ path: url, method: "DELETE" })
+  );
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString();
-
-  const handleRenameClick = (e: React.MouseEvent) => {
+  const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement rename functionality
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // TODO: Implement delete functionality
+    await deleteStory();
+    await onDelete();
   };
 
   return (
-    <Item className="group/story-item" ref={ref} variant="outline">
+    <Item className="group" variant="outline">
       <ItemContent>
         <div className="flex items-center justify-between gap-2">
           <ItemTitle className="font-mono">{story.title}</ItemTitle>
           <div className="flex items-center gap-2">
-            <motion.span
-              className="text-muted-foreground text-sm"
-              layout
-              transition={{ duration: 0.2, bounce: 0 }}
-            >
-              {formatDate(story.createdAt)}
-            </motion.span>
+            <span className="text-muted-foreground text-sm">
+              {new Date(story.createdAt).toLocaleDateString()}
+            </span>
             <ItemActions>
-              <AnimatePresence mode="popLayout">
-                {hovered ? (
-                  <motion.div
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-2"
-                    exit={{ opacity: 0, x: 34 }}
-                    initial={{ opacity: 0, x: 34 }}
-                    transition={{ duration: 0.2, bounce: 0 }}
-                  >
-                    <button
-                      aria-label="Rename story"
-                      className="h-5 w-5 cursor-pointer"
-                      onClick={handleRenameClick}
-                      type="button"
-                    >
-                      <Pencil className="h-4 w-4 hover:text-muted-foreground" />
-                    </button>
-                    <button
-                      aria-label="Delete story"
-                      className="h-5 w-5 cursor-pointer"
-                      onClick={handleDeleteClick}
-                      type="button"
-                    >
-                      <Trash className="h-4 w-4 hover:text-destructive" />
-                    </button>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+              <motion.div
+                animate={{ opacity: 1, x: 0 }}
+                className="hidden items-center gap-2 group-hover:flex"
+                exit={{ opacity: 0, x: 34 }}
+                initial={{ opacity: 0, x: 34 }}
+                transition={{ duration: 0.2, bounce: 0 }}
+              >
+                <button
+                  aria-label="Delete story"
+                  className="h-5 w-5 cursor-pointer"
+                  onClick={handleDeleteClick}
+                  type="button"
+                >
+                  <Trash className="h-4 w-4 hover:text-destructive" />
+                </button>
+              </motion.div>
             </ItemActions>
           </div>
         </div>
@@ -86,15 +71,14 @@ function StoryListItem({ story }: { story: Story }) {
 }
 
 export default function StoryPage() {
-  const storiesKey = useMemo(
-    () => ({
-      path: "/api/story",
-      select: (data: { docs: Story[] }) => data.docs,
-    }),
-    []
+  const { data: stories, mutate } = useSWR<Story[]>(
+    "/api/story",
+    (url: string) =>
+      fetcher<Story[]>({
+        path: url,
+        select: (data: unknown) => (data as { docs: Story[] }).docs,
+      })
   );
-
-  const { data: stories } = useSWR<Story[]>(storiesKey);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-6 p-6">
@@ -107,7 +91,13 @@ export default function StoryPage() {
       ) : (
         <ItemGroup className="w-full gap-4">
           {stories?.map((story) => (
-            <StoryListItem key={story.id} story={story} />
+            <StoryListItem
+              key={story.id}
+              onDelete={async () => {
+                await mutate();
+              }}
+              story={story}
+            />
           ))}
         </ItemGroup>
       )}

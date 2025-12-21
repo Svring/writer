@@ -87,6 +87,7 @@
     "@sindresorhus/slugify": "^3.0.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@tanstack/react-form": "^1.27.5",
+    "@tanstack/react-pacer": "^0.18.0",
     "@tanstack/react-query": "^5.90.11",
     "@tanstack/zod-form-adapter": "^0.42.1",
     "@trpc/client": "^11.7.2",

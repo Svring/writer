@@ -1,9 +1,7 @@
 "use client";
 
-import { useHover } from "@reactuses/core";
-import { AnimatePresence, motion } from "framer-motion";
-import { Pencil, Plus, Trash } from "lucide-react";
-import { useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import { Plus, Trash } from "lucide-react";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import type { WorldInsert } from "@/collections/world";
@@ -21,65 +19,50 @@ import { WorldForm } from "@/components/world-form";
 import { fetcher } from "@/lib/fetch";
 import type { World } from "@/payload-types";
 
-function WorldListItem({ world }: { world: World }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const hovered = useHover(ref);
+function WorldListItem({
+  world,
+  onDelete,
+}: {
+  world: World;
+  onDelete: () => Promise<void>;
+}) {
+  const { trigger: deleteWorld } = useSWRMutation(
+    `/api/world/${world.id}`,
+    (url) => fetcher({ path: url, method: "DELETE" })
+  );
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString();
-
-  const handleRenameClick = (e: React.MouseEvent) => {
+  const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement rename functionality
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // TODO: Implement delete functionality
+    await deleteWorld();
+    await onDelete();
   };
 
   return (
-    <Item className="group/world-item" ref={ref} variant="outline">
+    <Item className="group" variant="outline">
       <ItemContent>
         <div className="flex items-center justify-between gap-2">
           <ItemTitle className="font-mono">{world.name}</ItemTitle>
           <div className="flex items-center gap-2">
-            <motion.span
-              className="text-muted-foreground text-sm"
-              layout
-              transition={{ duration: 0.2, bounce: 0 }}
-            >
-              {formatDate(world.createdAt)}
-            </motion.span>
+            <span className="text-muted-foreground text-sm">
+              {new Date(world.createdAt).toLocaleDateString()}
+            </span>
             <ItemActions>
-              <AnimatePresence mode="popLayout">
-                {hovered ? (
-                  <motion.div
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-2"
-                    exit={{ opacity: 0, x: 34 }}
-                    initial={{ opacity: 0, x: 34 }}
-                    transition={{ duration: 0.2, bounce: 0 }}
-                  >
-                    <button
-                      aria-label="Rename world"
-                      className="h-5 w-5 cursor-pointer"
-                      onClick={handleRenameClick}
-                      type="button"
-                    >
-                      <Pencil className="h-4 w-4 hover:text-muted-foreground" />
-                    </button>
-                    <button
-                      aria-label="Delete world"
-                      className="h-5 w-5 cursor-pointer"
-                      onClick={handleDeleteClick}
-                      type="button"
-                    >
-                      <Trash className="h-4 w-4 hover:text-destructive" />
-                    </button>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+              <motion.div
+                animate={{ opacity: 1, x: 0 }}
+                className="hidden items-center gap-2 group-hover:flex"
+                exit={{ opacity: 0, x: 34 }}
+                initial={{ opacity: 0, x: 34 }}
+                transition={{ duration: 0.2, bounce: 0 }}
+              >
+                <button
+                  aria-label="Delete world"
+                  className="h-5 w-5 cursor-pointer"
+                  onClick={handleDeleteClick}
+                  type="button"
+                >
+                  <Trash className="h-4 w-4 hover:text-destructive" />
+                </button>
+              </motion.div>
             </ItemActions>
           </div>
         </div>
@@ -92,15 +75,14 @@ function WorldListItem({ world }: { world: World }) {
 }
 
 export default function WorldPage() {
-  const worldsKey = useMemo(
-    () => ({
-      path: "/api/world",
-      select: (data: { docs: World[] }) => data.docs,
-    }),
-    []
+  const { data: worlds, mutate } = useSWR<World[]>(
+    "/api/world",
+    (url: string) =>
+      fetcher<World[]>({
+        path: url,
+        select: (data: unknown) => (data as { docs: World[] }).docs,
+      })
   );
-
-  const { data: worlds, mutate } = useSWR<World[]>(worldsKey);
 
   const { trigger: createWorld } = useSWRMutation(
     "/api/world",
@@ -133,7 +115,13 @@ export default function WorldPage() {
       ) : (
         <ItemGroup className="w-full gap-4">
           {worlds?.map((world) => (
-            <WorldListItem key={world.id} world={world} />
+            <WorldListItem
+              key={world.id}
+              onDelete={async () => {
+                await mutate();
+              }}
+              world={world}
+            />
           ))}
         </ItemGroup>
       )}
