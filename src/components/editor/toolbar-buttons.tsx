@@ -41,9 +41,7 @@ export function ToolbarButtons() {
 
           <div className="flex flex-1 items-center justify-center">
             {story?.title ? (
-              <span className="truncate font-medium text-sm">
-                {story.title}
-              </span>
+              <span className="truncate font-medium">{story.title}</span>
             ) : null}
           </div>
 

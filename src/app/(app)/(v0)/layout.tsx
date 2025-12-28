@@ -63,23 +63,22 @@ export default function V0Layout({ children }: { children: React.ReactNode }) {
           ) : (
             <motion.div
               animate={{ opacity: 1, x: 0 }}
-              className="relative flex flex-1 flex-col"
+              className="relative flex flex-1 flex-col overflow-auto"
               exit={{ opacity: 0, x: -100 }}
               initial={{ opacity: 0, x: -100 }}
               key="editor"
+              style={{
+                fontFamily:
+                  '"New York", -apple-system-ui-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
+              }}
               transition={{ duration: 0.1 }}
             >
               <Plate editor={editor} onChange={onChange}>
                 <FixedToolbar>
                   <ToolbarButtons />
                 </FixedToolbar>
-                <EditorContainer
-                  style={{
-                    fontFamily:
-                      '"New York", -apple-system-ui-serif, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
-                  }}
-                >
-                  <EditorContent />
+                <EditorContainer>
+                  <EditorContent className="scrollbar-hide" />
                 </EditorContainer>
               </Plate>
             </motion.div>
